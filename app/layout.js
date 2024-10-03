@@ -1,8 +1,8 @@
-'use client'; // Ensure this file runs on the client
+'use client';
 
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import theme from './theme'; // Import the theme
+import theme from './theme'; 
 import './globals.css';
 
 
