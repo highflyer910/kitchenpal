@@ -5,16 +5,21 @@ import {
   Button, TextField, Box, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions,
   IconButton, Paper, Container, Grid, Fade,
-  useTheme, useMediaQuery, Grow, Zoom, CircularProgress
+  useTheme, useMediaQuery, Grow, Zoom, CircularProgress,
+  FormGroup, FormControlLabel, Checkbox, Divider,
+  Switch, Chip, InputAdornment as Adornment, Alert
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import SearchIcon from '@mui/icons-material/Search';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import RestrictionsIcon from '@mui/icons-material/NoMeals';
 import InputAdornment from '@mui/material/InputAdornment';
 import { keyframes } from '@mui/system';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+
 
 // Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
@@ -39,6 +44,22 @@ const smoothScale = keyframes`
   }
 `;
 
+const searchBarStyles = {
+  '& .MuiOutlinedInput-root': {
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    borderRadius: 2,
+    '&:hover': {
+      boxShadow: 1,
+    },
+    '&.Mui-focused': {
+      boxShadow: 2,
+    }
+  },
+  '& .MuiOutlinedInput-input': {
+    padding: '12px 14px',
+  }
+};
+
 export default function HomePage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -54,6 +75,32 @@ export default function HomePage() {
   const [recipeContent, setRecipeContent] = useState('');
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
 
+  const [dietaryProfileOpen, setDietaryProfileOpen] = useState(false);
+  const [dietaryProfile, setDietaryProfile] = useState({
+    allergens: {
+      gluten: false,
+      dairy: false,
+      nuts: false,
+      eggs: false,
+      soy: false,
+      shellfish: false,
+      customAllergens: []
+    },
+    preferences: {
+      vegetarian: false,
+      vegan: false,
+      kosher: false,
+      halal: false
+    },
+    healthGoals: {
+      lowSodium: false,
+      lowSugar: false,
+      highProtein: false,
+      lowCarb: false
+    }
+  });
+  const [customAllergen, setCustomAllergen] = useState('');
+
   // Load products from local storage
   useEffect(() => {
     const storedProducts = localStorage.getItem('products');
@@ -61,6 +108,14 @@ export default function HomePage() {
       setProductList(JSON.parse(storedProducts));
     }
   }, []);
+
+  const getActiveRestrictions = () => {
+    const allergenCount = Object.values(dietaryProfile.allergens).filter(v => v === true).length 
+      + dietaryProfile.allergens.customAllergens.length;
+    const prefCount = Object.values(dietaryProfile.preferences).filter(v => v === true).length;
+    const goalCount = Object.values(dietaryProfile.healthGoals).filter(v => v === true).length;
+    return allergenCount + prefCount + goalCount;
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -84,14 +139,67 @@ export default function HomePage() {
     localStorage.setItem('products', JSON.stringify(updatedProductList));
   };
 
+  // Handler for dietary profile changes
+  const handleDietaryChange = (category, item) => {
+    setDietaryProfile(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [item]: !prev[category][item]
+      }
+    }));
+  };
+
+  // Handler for custom allergens
+  const handleAddCustomAllergen = () => {
+    if (customAllergen && !dietaryProfile.allergens.customAllergens.includes(customAllergen)) {
+      setDietaryProfile(prev => ({
+        ...prev,
+        allergens: {
+          ...prev.allergens,
+          customAllergens: [...prev.allergens.customAllergens, customAllergen]
+        }
+      }));
+      setCustomAllergen('');
+    }
+  };
+
+  const handleRemoveCustomAllergen = (allergen) => {
+    setDietaryProfile(prev => ({
+      ...prev,
+      allergens: {
+        ...prev.allergens,
+        customAllergens: prev.allergens.customAllergens.filter(a => a !== allergen)
+      }
+    }));
+  };
+
   const generateRecipe = async () => {
     setIsLoadingRecipe(true);
     setRecipeOpen(true);
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      // Create dietary restrictions string
+      const allergens = Object.entries(dietaryProfile.allergens)
+        .filter(([key, value]) => value === true && key !== 'customAllergens')
+        .map(([key]) => key);
+      const customAllergens = dietaryProfile.allergens.customAllergens;
+      const preferences = Object.entries(dietaryProfile.preferences)
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key);
+      const healthGoals = Object.entries(dietaryProfile.healthGoals)
+        .filter(([_, value]) => value === true)
+        .map(([key]) => key);
+
+      const dietaryRestrictions = [...allergens, ...customAllergens, ...preferences];
+      const healthConsiderations = healthGoals;
       
-      const prompt = `You are a friendly and enthusiastic chef assistant. Based on these ingredients: ${productList.join(', ')}, engage in a brief friendly conversation first, then provide a recipe suggestion.
+      const prompt = `You are a friendly and enthusiastic chef assistant. Based on these ingredients: ${productList.join(', ')}, create a recipe that considers the following dietary restrictions and preferences:
+
+      Dietary Restrictions: ${dietaryRestrictions.length ? dietaryRestrictions.join(', ') : 'None'}
+      Health Considerations: ${healthConsiderations.length ? healthConsiderations.join(', ') : 'None'}
 
       Your response should follow this format:
       1. Start with "👩‍🍳"
@@ -100,7 +208,8 @@ export default function HomePage() {
       4. Recipe name as a heading
       5. List of ingredients with quantities
       6. Step by step cooking instructions
-      7. End with an enthusiastic "Bon appétit! 🍽️" and a friendly closing note.
+      7. Important dietary notes (allergen warnings, cross-contamination risks, etc.)
+      8. End with an enthusiastic "Bon appétit! 🍽️" and a friendly closing note.
 
       Keep the tone warm and encouraging throughout the response.
       Example start:
@@ -160,7 +269,7 @@ export default function HomePage() {
             </Typography>
             <Typography 
             variant="subtitle1" 
-            color="text.secondary"
+            color="primary"
             sx={{ 
               marginBottom: 4,
               opacity: 0,
@@ -222,38 +331,179 @@ export default function HomePage() {
         </Grid>
 
         <Fade in={true} timeout={1400}>
-          <TextField
-          variant="outlined"
-          placeholder="Search products"
+          <Grid container spacing={2} alignItems="stretch" sx={{ maxWidth: 800, margin: '0 auto' }}>
+            <Grid item xs={12} md={4}>
+              <TextField
+                variant="outlined"
+                placeholder="Search products"
+                fullWidth
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  ...searchBarStyles,
+                  height: '100%',
+                  '& .MuiInputBase-root': {
+                    height: '100%',
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <Button
+                variant="outlined"
+                onClick={() => setDietaryProfileOpen(true)}
+                startIcon={<RestrictionsIcon />}
+                endIcon={
+                  getActiveRestrictions() > 0 && 
+                  <Chip 
+                    size="small" 
+                    label={getActiveRestrictions()} 
+                    color="primary" 
+                    sx={{ height: 20, minWidth: 20 }} 
+                  />
+                }
+                sx={{
+                  height: '100%',
+                  width: '100%',
+                  fontSize: '1.1rem',
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                  '&:hover': {
+                    backgroundColor: 'primary.light',
+                    color: 'primary.contrastText',
+                  },
+                }}
+              >
+                Dietary Profile
+              </Button>
+            </Grid>
+          </Grid>
+        </Fade>
+
+      <Dialog
+          open={dietaryProfileOpen}
+          onClose={() => setDietaryProfileOpen(false)}
           fullWidth
-          sx={{
-            maxWidth: 800,
-            margin: '0 auto',
-            '& .MuiOutlinedInput-root': {
-            borderRadius: 2,
-            bgcolor: 'background.paper',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            '&:hover': {
-            transform: 'translateY(-1px)',
-            boxShadow: 2
-          },
-            '&.Mui-focused': {
-            transform: 'translateY(-1px)',
-            boxShadow: 3
-          }
-        }
-      }}
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      InputProps={{
-        startAdornment: (
-        <InputAdornment position="start">
-        <SearchIcon color="action" />
-        </InputAdornment>
-        ),
-      }}
-      />
-      </Fade>
+          maxWidth="sm"
+          TransitionComponent={Zoom}
+          transitionDuration={400}
+        >
+          <DialogTitle sx={{ fontWeight: 600 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <RestrictionsIcon /> Dietary Profile
+            </Box>
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ mt: 2 }}>
+              {/* Allergens Section */}
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                🚫 Allergens & Intolerances
+              </Typography>
+              <FormGroup>
+                {['gluten', 'dairy', 'nuts', 'eggs', 'soy', 'shellfish'].map((allergen) => (
+                  <FormControlLabel
+                    key={allergen}
+                    control={
+                      <Checkbox
+                        checked={dietaryProfile.allergens[allergen]}
+                        onChange={() => handleDietaryChange('allergens', allergen)}
+                      />
+                    }
+                    label={allergen.charAt(0).toUpperCase() + allergen.slice(1)}
+                  />
+                ))}
+              </FormGroup>
+
+              {/* Custom Allergens */}
+              <Box sx={{ mt: 2, mb: 3 }}>
+                <TextField
+                  size="small"
+                  value={customAllergen}
+                  onChange={(e) => setCustomAllergen(e.target.value)}
+                  placeholder="Add custom allergen"
+                  InputProps={{
+                    endAdornment: (
+                      <Button
+                        size="small"
+                        onClick={handleAddCustomAllergen}
+                        disabled={!customAllergen}
+                      >
+                        Add
+                      </Button>
+                    ),
+                  }}
+                />
+                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                  {dietaryProfile.allergens.customAllergens.map((allergen) => (
+                    <Chip
+                      key={allergen}
+                      label={allergen}
+                      onDelete={() => handleRemoveCustomAllergen(allergen)}
+                      size="small"
+                    />
+                  ))}
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Dietary Preferences */}
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                🥗 Dietary Preferences
+              </Typography>
+              <FormGroup>
+                {Object.keys(dietaryProfile.preferences).map((pref) => (
+                  <FormControlLabel
+                    key={pref}
+                    control={
+                      <Switch
+                        checked={dietaryProfile.preferences[pref]}
+                        onChange={() => handleDietaryChange('preferences', pref)}
+                      />
+                    }
+                    label={pref.charAt(0).toUpperCase() + pref.slice(1)}
+                  />
+                ))}
+              </FormGroup>
+
+              <Divider sx={{ my: 3 }} />
+
+              {/* Health Goals */}
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                ⚕️ Health Goals
+              </Typography>
+              <FormGroup>
+                {Object.keys(dietaryProfile.healthGoals).map((goal) => (
+                  <FormControlLabel
+                    key={goal}
+                    control={
+                      <Switch
+                        checked={dietaryProfile.healthGoals[goal]}
+                        onChange={() => handleDietaryChange('healthGoals', goal)}
+                      />
+                    }
+                    label={goal.split(/(?=[A-Z])/).join(' ')}
+                  />
+                ))}
+              </FormGroup>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ padding: 2 }}>
+            <Button
+              onClick={() => setDietaryProfileOpen(false)}
+              variant="contained"
+            >
+              Done
+            </Button>
+          </DialogActions>
+        </Dialog>
       
       {/* Products List */}
       <Fade in={true} timeout={1600}>
