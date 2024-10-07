@@ -3,69 +3,46 @@ import SearchIcon from '@mui/icons-material/Search';
 import RestrictionsIcon from '@mui/icons-material/NoMeals';
 
 export default function SearchAndDietary({ searchTerm, setSearchTerm, setDietaryProfileOpen, dietaryProfile }) {
-const getActiveRestrictions = () => {
-    const allergenCount = Object.values(dietaryProfile.allergens).filter(v => v === true).length 
-    + dietaryProfile.allergens.customAllergens.length;
-    const prefCount = Object.values(dietaryProfile.preferences).filter(v => v === true).length;
-    const goalCount = Object.values(dietaryProfile.healthGoals).filter(v => v === true).length;
-    return allergenCount + prefCount + goalCount;
-};
+  const getActiveRestrictions = () => {
+    const allergens = dietaryProfile?.allergens || {}; 
+    const preferences = dietaryProfile?.preferences || {}; 
+    const healthGoals = dietaryProfile?.healthGoals || {}; 
 
-return (
-<Fade in={true} timeout={1400}>
-    <Grid container spacing={2} alignItems="stretch" sx={{ maxWidth: 800, margin: '0 auto' }}>
-    <Grid item xs={12} md={4}>
+    const allergenCount = Object.values(allergens).filter(v => v === true).length 
+      + (allergens.customAllergens ? allergens.customAllergens.length : 0);
+    const prefCount = Object.values(preferences).filter(v => v === true).length;
+    const goalCount = Object.values(healthGoals).filter(v => v === true).length;
+
+    return allergenCount + prefCount + goalCount;
+  };
+
+  return (
+    <Grid container spacing={2} alignItems="center">
+      <Grid item xs={12} sm={8}>
         <TextField
-        variant="outlined"
-        placeholder="Search products"
-        fullWidth
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        InputProps={{
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder="Search products..."
+          fullWidth
+          InputProps={{
             startAdornment: (
-            <InputAdornment position="start">
-                <SearchIcon color="action" />
-                </InputAdornment>
-                ),
-            }}
-            sx={{
-                height: '100%',
-                '& .MuiInputBase-root': {
-                height: '100%',
-            },
-        }}
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
         />
-    </Grid>
-    <Grid item xs={12} md={8}>
+      </Grid>
+      <Grid item xs={12} sm={4}>
         <Button
-        variant="outlined"
-        onClick={() => setDietaryProfileOpen(true)}
-        startIcon={<RestrictionsIcon />}
-        endIcon={
-            getActiveRestrictions() > 0 && 
-            <Chip 
-            size="small" 
-            label={getActiveRestrictions()} 
-            color="primary" 
-            sx={{ height: 20, minWidth: 20 }} 
-        />
-    }
-    sx={{
-    height: '100%',
-    width: '100%',
-    fontSize: '1.1rem',
-    fontWeight: 'bold',
-    textTransform: 'none',
-    '&:hover': {
-    backgroundColor: 'primary.light',
-    color: 'primary.contrastText',
-    },
-}}
->
-    Dietary Profile
-    </Button>
+          startIcon={<RestrictionsIcon />}
+          onClick={() => setDietaryProfileOpen(true)}
+          variant="contained"
+          fullWidth
+        >
+          {`Dietary Profile (${getActiveRestrictions()})`}
+        </Button>
+      </Grid>
     </Grid>
-    </Grid>
-    </Fade>
-    );
+  );
 }
