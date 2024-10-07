@@ -29,6 +29,38 @@ const fadeInUp = keyframes`
   }
 `;
 
+const defaultDietaryProfile = {
+  allergens: {
+    gluten: false,
+    dairy: false,
+    nuts: false,
+    eggs: false,
+    soy: false,
+    shellfish: false,
+    customAllergens: []
+  },
+  preferences: {
+    vegetarian: false,
+    vegan: false,
+    kosher: false,
+    halal: false
+  },
+  healthGoals: {
+    lowSodium: false,
+    lowSugar: false,
+    highProtein: false,
+    lowCarb: false
+  }
+};
+
+const getInitialDietaryProfile = () => {
+  if (typeof window !== 'undefined') {
+    const storedProfile = localStorage.getItem('dietaryProfile');
+    return storedProfile ? JSON.parse(storedProfile) : defaultDietaryProfile;
+  }
+  return defaultDietaryProfile;
+};
+
 export default function HomePage() {
   const [open, setOpen] = useState(false);
   const [productName, setProductName] = useState('');
@@ -38,47 +70,28 @@ export default function HomePage() {
   const [recipeContent, setRecipeContent] = useState('');
   const [isLoadingRecipe, setIsLoadingRecipe] = useState(false);
   const [dietaryProfileOpen, setDietaryProfileOpen] = useState(false);
-  const [dietaryProfile, setDietaryProfile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const storedProfile = localStorage.getItem('dietaryProfile');
-      return storedProfile ? JSON.parse(storedProfile) : {
-        allergens: {
-          gluten: false,
-          dairy: false,
-          nuts: false,
-          eggs: false,
-          soy: false,
-          shellfish: false,
-          customAllergens: []
-        },
-        preferences: {
-          vegetarian: false,
-          vegan: false,
-          kosher: false,
-          halal: false
-        },
-        healthGoals: {
-          lowSodium: false,
-          lowSugar: false,
-          highProtein: false,
-          lowCarb: false
-        }
-      };
-    }
-    return {};
-  });
+  const [dietaryProfile, setDietaryProfile] = useState(defaultDietaryProfile);
   const [customAllergen, setCustomAllergen] = useState('');
+  const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
   useEffect(() => {
     const storedProducts = localStorage.getItem('products');
     if (storedProducts) {
       setProductList(JSON.parse(storedProducts));
     }
+
+    const storedProfile = localStorage.getItem('dietaryProfile');
+    if (storedProfile) {
+      setDietaryProfile(JSON.parse(storedProfile));
+    }
+    setIsProfileLoaded(true);
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('dietaryProfile', JSON.stringify(dietaryProfile));
-  }, [dietaryProfile]);
+    if (isProfileLoaded) { 
+      localStorage.setItem('dietaryProfile', JSON.stringify(dietaryProfile));
+    }
+  }, [dietaryProfile, isProfileLoaded]);
 
   const handleDietaryChange = (category, item) => {
     setDietaryProfile(prev => {
@@ -213,15 +226,15 @@ export default function HomePage() {
     <Fade in={true} timeout={1000}>
       <Container maxWidth="lg">
         <Box 
-        sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-          padding: { xs: 2, sm: 4 },
-          bgcolor: 'background.default',
-          animation: `${fadeInUp} 0.8s ease-out`
-        }}
+          sx={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 4,
+            padding: { xs: 2, sm: 4 },
+            bgcolor: 'background.default',
+            animation: `${fadeInUp} 0.8s ease-out`
+          }}
         >
           <Header />
           <ActionButtons 
@@ -229,12 +242,14 @@ export default function HomePage() {
             generateRecipe={generateRecipe} 
             productListLength={productList.length} 
           />
-          <SearchAndDietary 
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            setDietaryProfileOpen={setDietaryProfileOpen}
-            dietaryProfile={dietaryProfile}
-          />
+          {isProfileLoaded && (
+            <SearchAndDietary 
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              setDietaryProfileOpen={setDietaryProfileOpen}
+              dietaryProfile={dietaryProfile}
+            />
+          )}
           <ProductList 
             productList={productList} 
             searchTerm={searchTerm} 
@@ -259,7 +274,12 @@ export default function HomePage() {
             fadeInUp={fadeInUp}
           />
           {/* Recipe Dialog */}
-          <Dialog open={recipeOpen} onClose={handleCloseRecipe} fullWidth maxWidth="md" TransitionComponent={Zoom}
+          <Dialog 
+            open={recipeOpen} 
+            onClose={handleCloseRecipe} 
+            fullWidth 
+            maxWidth="md" 
+            TransitionComponent={Zoom}
             transitionDuration={400}
             PaperProps={{
               sx: {
@@ -267,7 +287,8 @@ export default function HomePage() {
                 padding: 1,
                 animation: `${fadeInUp} 0.5s ease-out`
               }
-            }}>
+            }}
+          >
             <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <RestaurantIcon /> Recipe Suggestion
             </DialogTitle>

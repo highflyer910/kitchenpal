@@ -9,13 +9,20 @@ import RestrictionsIcon from '@mui/icons-material/NoMeals';
 const DietaryProfileDialog = ({ 
   open, 
   onClose, 
-  dietaryProfile, 
+  dietaryProfile = {}, // Provide default empty object
   handleDietaryChange, 
   customAllergen, 
   setCustomAllergen,
   handleAddCustomAllergen,
   handleRemoveCustomAllergen
 }) => {
+  // Ensure dietaryProfile has all necessary properties
+  const safeProfile = {
+    allergens: { customAllergens: [], ...dietaryProfile.allergens },
+    preferences: { ...dietaryProfile.preferences },
+    healthGoals: { ...dietaryProfile.healthGoals }
+  };
+
   return (
     <Dialog
       open={open}
@@ -42,7 +49,7 @@ const DietaryProfileDialog = ({
                 key={allergen}
                 control={
                   <Checkbox
-                    checked={dietaryProfile.allergens[allergen]}
+                    checked={safeProfile.allergens[allergen] || false}
                     onChange={() => handleDietaryChange('allergens', allergen)}
                   />
                 }
@@ -71,7 +78,7 @@ const DietaryProfileDialog = ({
               }}
             />
             <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {dietaryProfile.allergens.customAllergens.map((allergen) => (
+              {safeProfile.allergens.customAllergens.map((allergen) => (
                 <Chip
                   key={allergen}
                   label={allergen}
@@ -89,12 +96,12 @@ const DietaryProfileDialog = ({
             🥗 Dietary Preferences
           </Typography>
           <FormGroup>
-            {Object.keys(dietaryProfile.preferences).map((pref) => (
+            {Object.keys(safeProfile.preferences).map((pref) => (
               <FormControlLabel
                 key={pref}
                 control={
                   <Switch
-                    checked={dietaryProfile.preferences[pref]}
+                    checked={safeProfile.preferences[pref] || false}
                     onChange={() => handleDietaryChange('preferences', pref)}
                   />
                 }
@@ -110,12 +117,12 @@ const DietaryProfileDialog = ({
             ⚕️ Health Goals
           </Typography>
           <FormGroup>
-            {Object.keys(dietaryProfile.healthGoals).map((goal) => (
+            {Object.keys(safeProfile.healthGoals).map((goal) => (
               <FormControlLabel
                 key={goal}
                 control={
                   <Switch
-                    checked={dietaryProfile.healthGoals[goal]}
+                    checked={safeProfile.healthGoals[goal] || false}
                     onChange={() => handleDietaryChange('healthGoals', goal)}
                   />
                 }
