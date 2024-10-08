@@ -55,6 +55,7 @@ const defaultDietaryProfile = {
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [productName, setProductName] = useState('');
@@ -68,39 +69,39 @@ export default function HomePage() {
   const [customAllergen, setCustomAllergen] = useState('');
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
-  // Check login status and load user data
-  // Check login status and load user data
-useEffect(() => {
-  const checkLoginStatus = async () => {
-    try {
-      await account.get();
-      setIsLoggedIn(true);
-    } catch (error) {
-      setIsLoggedIn(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  checkLoginStatus();
-}, []);
-
-// Load profile after successful login
-useEffect(() => {
-  if (isLoggedIn) {
-    const loadProfileData = () => {
-      const storedProducts = localStorage.getItem('products');
-      const storedProfile = localStorage.getItem('dietaryProfile');
-
-      if (storedProducts) setProductList(JSON.parse(storedProducts));
-      if (storedProfile) setDietaryProfile(JSON.parse(storedProfile));
-
-      setIsProfileLoaded(true);
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const user = await account.get();
+        setIsLoggedIn(true);
+        setUserName(user.name);
+      } catch (error) {
+        setIsLoggedIn(false);
+        setUserName('');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    loadProfileData();
-  }
-}, [isLoggedIn]); 
+    checkLoginStatus();
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const loadProfileData = () => {
+        const storedProducts = localStorage.getItem('products');
+        const storedProfile = localStorage.getItem('dietaryProfile');
+
+        if (storedProducts) setProductList(JSON.parse(storedProducts));
+        if (storedProfile) setDietaryProfile(JSON.parse(storedProfile));
+
+        setIsProfileLoaded(true);
+      };
+
+      loadProfileData();
+    }
+  }, [isLoggedIn]);
 
 
   // Save dietary profile changes
@@ -110,7 +111,6 @@ useEffect(() => {
     }
   }, [dietaryProfile, isProfileLoaded]);
 
-  const handleAuthSuccess = () => setIsLoggedIn(true);
 
 
   const handleDietaryChange = (category, item) => {
@@ -220,15 +220,30 @@ useEffect(() => {
     }
   };
 
+  const handleAuthSuccess = async () => {
+    try {
+      const user = await account.get();
+      setIsLoggedIn(true);
+      setUserName(user.name);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await account.deleteSession('current');
       setIsLoggedIn(false);
+      setUserName('');
       setIsProfileLoaded(false);
+      // Reset state, but don't clear local storage
+      setProductList([]);
+      setDietaryProfile(defaultDietaryProfile);
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
+
 
   if (isLoading) {
     return (
@@ -254,6 +269,7 @@ useEffect(() => {
             isLoggedIn={isLoggedIn} 
             onAuthSuccess={handleAuthSuccess} 
             onSignOut={handleSignOut}
+            userName={userName}
           />
           
           {isLoggedIn && (
