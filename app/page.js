@@ -100,7 +100,7 @@ useEffect(() => {
 
     loadProfileData();
   }
-}, [isLoggedIn]); // Now it listens for changes in the isLoggedIn state
+}, [isLoggedIn]); 
 
 
   // Save dietary profile changes
