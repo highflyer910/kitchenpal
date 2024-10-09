@@ -91,7 +91,7 @@ return (
     </Grid>
     ) : (
     <Typography variant="body2" color="text.secondary">
-        No products found.
+        Your kitchen looks a bit empty!
     </Typography>
 )}
     </Box>

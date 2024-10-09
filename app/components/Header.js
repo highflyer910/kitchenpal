@@ -22,7 +22,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          flexDirection: { xs: 'column', sm: 'row' }, // Stacks on mobile, aligns horizontally on larger screens
+          flexDirection: { xs: 'column', sm: 'row' },
         }}
       >
         {isLoggedIn ? (
@@ -32,7 +32,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
               fontWeight: 500,
               color: 'text.primary',
               textAlign: { xs: 'center', sm: 'left' },
-              mb: { xs: 2, sm: 0 }, // Adds margin on mobile for spacing
+              mb: { xs: 2, sm: 0 },
             }}
           >
             Welcome, {userName.split(' ')[0]}
@@ -49,8 +49,8 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             letterSpacing: '0.02em',
             textAlign: 'center',
             color: 'text.primary',
-            mb: { xs: 2, sm: 0 }, // Margin for mobile screens
-            flexGrow: 1, // Ensures the title remains centered
+            mb: { xs: 2, sm: 0 },
+            flexGrow: 1,
           }}
         >
           Kitchen Pal
@@ -72,18 +72,27 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
               '&:hover': {
                 borderWidth: 2,
               },
-              mb: { xs: 2, sm: 0 }, // Margin on mobile
+              mb: { xs: 2, sm: 0 },
             }}
           >
             Sign Out
           </Button>
         ) : (
-          <Box sx={{ width: { xs: 60, md: 100 } }} /> // Empty space for alignment
+          <Box sx={{ width: { xs: 60, md: 100 } }} />
         )}
       </Container>
 
+      {/* Center the text and AuthPage */}
       {!isLoggedIn && (
-        <>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+            mt: 4, // Added margin for spacing from the header
+          }}
+        >
           <Typography
             variant="h6"
             component="p"
@@ -99,8 +108,9 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
           >
             Save your ingredients, and discover delicious recipes in seconds!
           </Typography>
+
           <AuthPage onAuthSuccess={onAuthSuccess} />
-        </>
+        </Box>
       )}
     </Box>
   );

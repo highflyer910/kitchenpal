@@ -9,14 +9,13 @@ import RestrictionsIcon from '@mui/icons-material/NoMeals';
 const DietaryProfileDialog = ({ 
   open, 
   onClose, 
-  dietaryProfile = {}, // Provide default empty object
+  dietaryProfile = {}, 
   handleDietaryChange, 
   customAllergen, 
   setCustomAllergen,
   handleAddCustomAllergen,
   handleRemoveCustomAllergen
 }) => {
-  // Ensure dietaryProfile has all necessary properties
   const safeProfile = {
     allergens: { customAllergens: [], ...dietaryProfile.allergens },
     preferences: { ...dietaryProfile.preferences },
@@ -71,6 +70,7 @@ const DietaryProfileDialog = ({
                     size="small"
                     onClick={handleAddCustomAllergen}
                     disabled={!customAllergen}
+                    color= "text.primary"
                   >
                     Add
                   </Button>

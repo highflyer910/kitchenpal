@@ -274,6 +274,7 @@ export default function HomePage() {
           
           {isLoggedIn && (
             <>
+            
               <ActionButtons 
                 handleOpen={() => setOpen(true)} 
                 generateRecipe={generateRecipe} 
@@ -288,6 +289,10 @@ export default function HomePage() {
                   dietaryProfile={dietaryProfile}
                 />
               )}
+
+              <Typography align="center" color="text.primary">
+                You have {productList.length} products saved in your kitchen.
+              </Typography>
               
               <ProductList 
                 productList={productList} 
