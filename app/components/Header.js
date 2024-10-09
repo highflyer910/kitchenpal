@@ -5,7 +5,6 @@ import AuthPage from './AuthPage';
 export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -14,100 +13,94 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
         borderBottom: '1px solid',
         borderColor: 'divider',
         backgroundColor: 'background.default',
-        py: { xs: 1.5, sm: 2, md: 2.5 }
+        py: 2,
       }}
     >
-      <Container maxWidth="xl">
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: { xs: 1, sm: 2 }
-          }}
-        >
+      <Container
+        maxWidth="xl"
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' }, // Stacks on mobile, aligns horizontally on larger screens
+        }}
+      >
+        {isLoggedIn ? (
           <Typography
-            variant={isMobile ? 'h5' : (isTablet ? 'h4' : 'h3')}
-            component="h1"
+            variant="h6"
             sx={{
-              fontWeight: 700,
-              letterSpacing: '0.02em',
-              color: 'primary.main',
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' },
-              flexGrow: 1,
+              fontWeight: 500,
+              color: 'text.primary',
               textAlign: { xs: 'center', sm: 'left' },
-              order: { xs: 1, sm: 2 },
-              width: { xs: '100%', sm: 'auto' }
+              mb: { xs: 2, sm: 0 }, // Adds margin on mobile for spacing
             }}
           >
-            Kitchen Pal
+            Welcome, {userName.split(' ')[0]}
           </Typography>
+        ) : (
+          <Box sx={{ width: { xs: 60, md: 100 } }} /> // Empty space for alignment
+        )}
 
-          {isLoggedIn && (
-            <Typography 
-              variant="body1"
-              sx={{
-                fontWeight: 500,
-                color: 'text.secondary',
-                fontSize: { xs: '0.875rem', sm: '1rem' },
-                order: { xs: 2, sm: 1 }
-              }}
-            >
-              Welcome, {userName.split(' ')[0]}
-            </Typography>
-          )}
+        <Typography
+          variant={isMobile ? 'h5' : 'h3'}
+          component="h1"
+          sx={{
+            fontWeight: 700,
+            letterSpacing: '0.02em',
+            textAlign: 'center',
+            color: 'text.primary',
+            mb: { xs: 2, sm: 0 }, // Margin for mobile screens
+            flexGrow: 1, // Ensures the title remains centered
+          }}
+        >
+          Kitchen Pal
+        </Typography>
 
-          {isLoggedIn ? (
-            <Button
-              color="primary"
-              onClick={onSignOut}
-              variant="outlined"
-              size={isMobile ? "small" : "medium"}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: { xs: 1.5, sm: 2, md: 3 },
-                py: { xs: 0.5, sm: 0.75, md: 1 },
-                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+        {isLoggedIn ? (
+          <Button
+            color="primary"
+            onClick={onSignOut}
+            variant="outlined"
+            size={isMobile ? 'small' : 'medium'}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: { xs: 2, md: 3 },
+              py: { xs: 0.5, md: 1 },
+              borderWidth: 2,
+              '&:hover': {
                 borderWidth: 2,
-                '&:hover': {
-                  borderWidth: 2,
-                },
-                order: 3
-              }}
-            >
-              Sign Out
-            </Button>
-          ) : (
-            <Box sx={{ order: 3 }} /> 
-          )}
-        </Box>
+              },
+              mb: { xs: 2, sm: 0 }, // Margin on mobile
+            }}
+          >
+            Sign Out
+          </Button>
+        ) : (
+          <Box sx={{ width: { xs: 60, md: 100 } }} /> // Empty space for alignment
+        )}
+      </Container>
 
-        {!isLoggedIn && (
-          <Typography 
-            variant="h6" 
-            component="p" 
-            align="center" 
+      {!isLoggedIn && (
+        <>
+          <Typography
+            variant="h6"
+            component="p"
+            align="center"
             sx={{
               color: 'text.secondary',
               maxWidth: '600px',
               fontWeight: 500,
-              fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
-              mt: { xs: 2, sm: 3 },
-              mx: 'auto'
+              fontSize: { xs: '1rem', md: '1.25rem' },
+              mb: 4,
+              px: 2,
             }}
           >
             Save your ingredients, and discover delicious recipes in seconds!
           </Typography>
-        )}
-      </Container>
-      
-      {!isLoggedIn && (
-        <Box sx={{ mt: { xs: 3, sm: 4, md: 5 } }}>
           <AuthPage onAuthSuccess={onAuthSuccess} />
-        </Box>
+        </>
       )}
     </Box>
   );
