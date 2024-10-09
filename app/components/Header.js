@@ -5,6 +5,7 @@ import AuthPage from './AuthPage';
 export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Box
@@ -13,58 +14,49 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
         borderBottom: '1px solid',
         borderColor: 'divider',
         backgroundColor: 'background.default',
-        py: 2
+        py: { xs: 1.5, sm: 2, md: 2.5 }
       }}
     >
-      <Container
-        maxWidth="xl"
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+      <Container maxWidth="xl">
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '100%',
-            mb: 2
+            flexWrap: 'wrap',
+            gap: { xs: 1, sm: 2 }
           }}
         >
-          {isLoggedIn ? (
-            <Typography 
-              variant="h6"
-              sx={{
-                fontWeight: 500,
-                color: 'text.primary',
-                [theme.breakpoints.down('sm')]: {
-                  fontSize: '1rem',
-                },
-              }}
-            >
-              Welcome, {userName.split(' ')[0]}
-            </Typography>
-          ) : (
-            <Box sx={{ width: { xs: 60, md: 100 } }} /> 
-          )}
-
           <Typography
-            variant={isMobile ? 'h5' : 'h3'}
+            variant={isMobile ? 'h5' : (isTablet ? 'h4' : 'h3')}
             component="h1"
             sx={{
-              textAlign: 'center',
               fontWeight: 700,
               letterSpacing: '0.02em',
-              color: 'text.primary',
-              [theme.breakpoints.up('md')]: {
-                fontSize: '2.75rem',
-              },
+              color: 'primary.main',
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' },
+              flexGrow: 1,
+              textAlign: { xs: 'center', sm: 'left' },
+              order: { xs: 1, sm: 2 },
+              width: { xs: '100%', sm: 'auto' }
             }}
           >
             Kitchen Pal
           </Typography>
+
+          {isLoggedIn && (
+            <Typography 
+              variant="body1"
+              sx={{
+                fontWeight: 500,
+                color: 'text.secondary',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                order: { xs: 2, sm: 1 }
+              }}
+            >
+              Welcome, {userName.split(' ')[0]}
+            </Typography>
+          )}
 
           {isLoggedIn ? (
             <Button
@@ -76,18 +68,20 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
                 borderRadius: 2,
                 textTransform: 'none',
                 fontWeight: 600,
-                px: { xs: 2, md: 3 },
-                py: { xs: 0.5, md: 1 },
+                px: { xs: 1.5, sm: 2, md: 3 },
+                py: { xs: 0.5, sm: 0.75, md: 1 },
+                fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
                 borderWidth: 2,
                 '&:hover': {
                   borderWidth: 2,
-                }
+                },
+                order: 3
               }}
             >
               Sign Out
             </Button>
           ) : (
-            <Box sx={{ width: { xs: 60, md: 100 } }} /> 
+            <Box sx={{ order: 3 }} /> 
           )}
         </Box>
 
@@ -100,17 +94,21 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
               color: 'text.secondary',
               maxWidth: '600px',
               fontWeight: 500,
-              fontSize: { xs: '1rem', md: '1.25rem' },
-              mb: 4,
-              px: 2
+              fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+              mt: { xs: 2, sm: 3 },
+              mx: 'auto'
             }}
           >
             Save your ingredients, and discover delicious recipes in seconds!
           </Typography>
         )}
-
-        {!isLoggedIn && <AuthPage onAuthSuccess={onAuthSuccess} />}
       </Container>
+      
+      {!isLoggedIn && (
+        <Box sx={{ mt: { xs: 3, sm: 4, md: 5 } }}>
+          <AuthPage onAuthSuccess={onAuthSuccess} />
+        </Box>
+      )}
     </Box>
   );
 }

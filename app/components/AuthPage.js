@@ -114,7 +114,7 @@ const AuthPage = ({ onAuthSuccess }) => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ py: { xs: 3, md: 6 } }}>
+        <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 } }}>
             <Grid container spacing={{ xs: 3, md: 6 }} justifyContent="center">
                 <Grid item xs={12} md={3} container direction="column" spacing={2} alignItems="center">
                     <Grid item xs>
