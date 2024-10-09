@@ -145,13 +145,14 @@ const AuthPage = ({ onAuthSuccess }) => {
                     >
                         <Box sx={{ 
                             mb: { xs: 3, md: 5 }, 
-                            textAlign: 'center' 
+                            textAlign: 'center',
+                            display: 'flex',
+                            justifyContent: 'center' 
                         }}>
                             <Box sx={{ 
                                 width: { xs: '280px', sm: '320px' },
                                 height: { xs: '200px', sm: '240px' }, 
-                                position: 'relative',
-                                margin: '0 auto'
+                                position: 'relative'
                             }}>
                                 <Image 
                                     src="/illustration.svg" 
