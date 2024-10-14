@@ -5,15 +5,27 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import Zoom from '@mui/material/Zoom';
+import { saveProduct } from '../appwrite';
 
 const AddProductDialog = ({ 
   open, 
   handleClose, 
   productName, 
   setProductName, 
-  handleAddProduct,
-  fadeInUp 
+  setProductList,
+  fadeInUp,
+  userId 
 }) => {
+  const handleAddProduct = async () => {
+    try {
+      const newProduct = await saveProduct(productName, userId); 
+      setProductList((prevList) => [...prevList, newProduct]);
+      handleClose();
+      setProductName('');
+    } catch (error) {
+      console.error("Failed to add product:", error);
+    }
+  };
   return (
     <Dialog 
       open={open} 

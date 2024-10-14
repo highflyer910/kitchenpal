@@ -17,10 +17,11 @@ const DietaryProfileDialog = ({
   handleRemoveCustomAllergen
 }) => {
   const safeProfile = {
-    allergens: { customAllergens: [], ...dietaryProfile.allergens },
-    preferences: { ...dietaryProfile.preferences },
-    healthGoals: { ...dietaryProfile.healthGoals }
-  };
+  allergens: { customAllergens: [], ...dietaryProfile.allergens },
+  preferences: { vegetarian: false, vegan: false, kosher: false, halal: false, ...dietaryProfile.preferences },
+  healthGoals: { lowSodium: false, lowSugar: false, highProtein: false, lowCarb: false, ...dietaryProfile.healthGoals }
+};
+
 
   return (
     <Dialog
@@ -91,7 +92,6 @@ const DietaryProfileDialog = ({
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Dietary Preferences */}
           <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             🥗 Dietary Preferences
           </Typography>
@@ -112,7 +112,6 @@ const DietaryProfileDialog = ({
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Health Goals */}
           <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             ⚕️ Health Goals
           </Typography>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Box, Container, Fade, Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, Button, CircularProgress, Zoom
@@ -8,7 +8,7 @@ import {
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { keyframes } from '@mui/system';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { account } from './appwrite';
+import { account, databases, getProducts, getDietaryProfile, saveDietaryProfile } from './appwrite';
 import Header from './components/Header';
 import ActionButtons from './components/ActionsButtons';
 import SearchAndDietary from './components/SearchAndDietary';
@@ -55,6 +55,7 @@ const defaultDietaryProfile = {
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -69,31 +70,58 @@ export default function HomePage() {
   const [customAllergen, setCustomAllergen] = useState('');
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
 
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const user = await account.get();
-        setIsLoggedIn(true);
-        setUserName(user.name);
-      } catch (error) {
-        setIsLoggedIn(false);
-        setUserName('');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLoginStatus();
+  const checkLoginStatus = useCallback(async () => {
+    try {
+      const user = await account.get();
+      setIsLoggedIn(true);
+      setUserName(user.name);
+      setUserId(user.$id);
+    } catch (error) {
+      setIsLoggedIn(false);
+      setUserName('');
+      setUserId(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
+    checkLoginStatus();
+  }, [checkLoginStatus]);
+
+  const loadProductList = useCallback(async () => {
+    if (!userId) return; 
+    try {
+      const products = await getProducts(userId);
+      setProductList(products);
+      localStorage.setItem('products', JSON.stringify(products));
+    } catch (error) {
+      console.error('Error loading products from Appwrite:', error);
+      const storedProducts = localStorage.getItem('products');
+      if (storedProducts) {
+        setProductList(JSON.parse(storedProducts));
+      }
+    }
+  }, [userId]);
+  
+  useEffect(() => {
+    if (isLoggedIn && userId) {
+      loadProductList();
+    }
+  }, [isLoggedIn, userId, loadProductList]);
+
+  useEffect(() => {
     if (isLoggedIn) {
-      const loadProfileData = () => {
+      const loadProfileData = async () => {
         const storedProducts = localStorage.getItem('products');
         const storedProfile = localStorage.getItem('dietaryProfile');
 
-        if (storedProducts) setProductList(JSON.parse(storedProducts));
+        if (storedProducts) {
+          setProductList(JSON.parse(storedProducts));
+        } else {
+          await loadProductList();
+        }
+
         if (storedProfile) setDietaryProfile(JSON.parse(storedProfile));
 
         setIsProfileLoaded(true);
@@ -101,77 +129,113 @@ export default function HomePage() {
 
       loadProfileData();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, loadProductList]);
 
+  const loadDietaryProfile = async (userId) => {
+    try {
+      const profile = await getDietaryProfile(userId);
+      console.log('Loaded profile:', profile); // Debug line
+      setDietaryProfile(profile);
+      localStorage.setItem('dietaryProfile', JSON.stringify(profile));
+    } catch (error) {
+      console.error('Error loading dietary profile:', error);
+      const storedProfile = localStorage.getItem('dietaryProfile');
+      if (storedProfile) {
+        setDietaryProfile(JSON.parse(storedProfile));
+      }
+    }
+  };
+  
 
-  // Save dietary profile changes
   useEffect(() => {
     if (isProfileLoaded) {
       localStorage.setItem('dietaryProfile', JSON.stringify(dietaryProfile));
     }
   }, [dietaryProfile, isProfileLoaded]);
 
+  const handleDietaryChange = async (category, item) => {
+    console.log('Current category:', category);
+    console.log('Current item:', item);
+    
+    const newProfile = {
+      ...dietaryProfile,
+      [category]: {
+        ...dietaryProfile[category],
+        [item]: !dietaryProfile[category][item]
+      }
+    };
+    
+    console.log('Updated profile:', newProfile);
+    
+    setDietaryProfile(newProfile);
+    localStorage.setItem('dietaryProfile', JSON.stringify(newProfile));
+  
+    try {
+      await saveDietaryProfile(userId, newProfile);
+    } catch (error) {
+      console.error('Error saving dietary profile:', error);
+    }
+  };
+  
 
-
-  const handleDietaryChange = (category, item) => {
-    setDietaryProfile(prev => {
+  const handleAddCustomAllergen = async () => {
+    if (customAllergen && !dietaryProfile.allergens.customAllergens.includes(customAllergen)) {
       const newProfile = {
-        ...prev,
-        [category]: {
-          ...prev[category],
-          [item]: !prev[category][item]
+        ...dietaryProfile,
+        allergens: {
+          ...dietaryProfile.allergens,
+          customAllergens: [...dietaryProfile.allergens.customAllergens, customAllergen]
         }
       };
-      return newProfile;
-    });
-  };
-
-  const handleAddCustomAllergen = () => {
-    if (customAllergen && !dietaryProfile.allergens.customAllergens.includes(customAllergen)) {
-      setDietaryProfile(prev => ({
-        ...prev,
-        allergens: {
-          ...prev.allergens,
-          customAllergens: [...prev.allergens.customAllergens, customAllergen]
-        }
-      }));
+      setDietaryProfile(newProfile);
       setCustomAllergen('');
-    }
-  };
-
-  const handleRemoveCustomAllergen = (allergen) => {
-    setDietaryProfile(prev => ({
-      ...prev,
-      allergens: {
-        ...prev.allergens,
-        customAllergens: prev.allergens.customAllergens.filter(a => a !== allergen)
+      localStorage.setItem('dietaryProfile', JSON.stringify(newProfile));
+      
+      try {
+        await saveDietaryProfile(userId, newProfile);
+      } catch (error) {
+        console.error('Error saving dietary profile:', error);
       }
-    }));
-  };
-
-  const handleAddProduct = () => {
-    if (productName) {
-      const updatedProductList = [...productList, productName];
-      setProductList(updatedProductList);
-      setProductName('');
-      setOpen(false);
-      localStorage.setItem('products', JSON.stringify(updatedProductList));
     }
   };
 
-  const deleteProduct = (productToDelete) => {
-    const updatedProductList = productList.filter(product => product !== productToDelete);
-    setProductList(updatedProductList);
-    localStorage.setItem('products', JSON.stringify(updatedProductList));
+  const handleRemoveCustomAllergen = async (allergen) => {
+    const newProfile = {
+      ...dietaryProfile,
+      allergens: {
+        ...dietaryProfile.allergens,
+        customAllergens: dietaryProfile.allergens.customAllergens.filter(a => a !== allergen)
+      }
+    };
+    setDietaryProfile(newProfile);
+    localStorage.setItem('dietaryProfile', JSON.stringify(newProfile));
+    
+    try {
+      await saveDietaryProfile(userId, newProfile);
+    } catch (error) {
+      console.error('Error saving dietary profile:', error);
+    }
+  };
+
+  const handleAddProduct = async (productName) => {
+    try {
+      const newProduct = await saveProduct(productName, userId);
+      setProductList(prevList => [...prevList, newProduct]);
+      localStorage.setItem('products', JSON.stringify([...productList, newProduct]));
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
   };
 
   const generateRecipe = async () => {
     setIsLoadingRecipe(true);
     setRecipeOpen(true);
-
+  
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-
+  
+      const productNames = productList.map(product => product.name); 
+  
       const dietaryRestrictions = [
         ...Object.entries(dietaryProfile.allergens)
           .filter(([key, value]) => value === true && key !== 'customAllergens')
@@ -186,7 +250,7 @@ export default function HomePage() {
         .filter(([_, value]) => value === true)
         .map(([key]) => key);
 
-      const prompt = `You are a friendly and enthusiastic chef assistant. Here's a list of ingredients available: ${productList.join(', ')}. 
+      const prompt = `You are a friendly and enthusiastic chef assistant. Here's a list of ingredients available: ${productNames.join(', ')}. 
 
       Create a recipe using some of these ingredients (you don't need to use all of them) while considering the following dietary restrictions and preferences:
 
@@ -236,14 +300,12 @@ export default function HomePage() {
       setIsLoggedIn(false);
       setUserName('');
       setIsProfileLoaded(false);
-      // Reset state, but don't clear local storage
       setProductList([]);
       setDietaryProfile(defaultDietaryProfile);
     } catch (error) {
       console.error('Error signing out:', error);
     }
   };
-
 
   if (isLoading) {
     return (
@@ -271,6 +333,36 @@ export default function HomePage() {
             onSignOut={handleSignOut}
             userName={userName}
           />
+          <Typography 
+          variant="h5" 
+          sx={{ 
+          textAlign: 'center',
+          fontFamily: 'Quicksand, sans-serif',
+          color: 'text.secondary',
+          }}>
+          Your friendly AI-powered kitchen assistant
+          </Typography>
+
+          <Box 
+          sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          flexDirection: 'column', 
+          textAlign: 'center' 
+          }}
+          >
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          Hungry? KitchenPal will help you whip up something delicious using the ingredients you already have! 
+          </Typography>
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          Got dietary restrictions? No problem—our recipes are tailor-made to fit your unique needs.
+          </Typography>
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          Ready to get started? Dive into your pantry, adjust your dietary settings, and let’s cook up something amazing!
+          </Typography>
+          </Box>
+
           
           {isLoggedIn && (
             <>
@@ -297,7 +389,7 @@ export default function HomePage() {
               <ProductList 
                 productList={productList} 
                 searchTerm={searchTerm} 
-                handleDeleteProduct={deleteProduct} 
+                setProductList={setProductList}
               />
               
               <DietaryProfileDialog 
@@ -314,11 +406,14 @@ export default function HomePage() {
               <AddProductDialog 
                 open={open}
                 handleClose={() => setOpen(false)}
+                handleAddProduct={handleAddProduct}
                 productName={productName}
                 setProductName={setProductName}
-                handleAddProduct={handleAddProduct}
+                setProductList={setProductList}
                 fadeInUp={fadeInUp}
+                userId={userId} 
               />
+
               
               <Dialog 
                 open={recipeOpen} 
@@ -353,6 +448,7 @@ export default function HomePage() {
                         color: 'text.primary', 
                         '& h1, & h2, & h3': {
                           fontWeight: 600,
+                          fontFamily: 'Quicksand, sans-serif',
                           my: 2,
                           color: 'primary.main'
                         },

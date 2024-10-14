@@ -38,7 +38,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             Welcome, {userName.split(' ')[0]}
           </Typography>
         ) : (
-          <Box sx={{ width: { xs: 60, md: 100 } }} /> // Empty space for alignment
+          <Box sx={{ width: { xs: 60, md: 100 } }} /> 
         )}
 
         <Typography
@@ -51,6 +51,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             color: 'text.primary',
             mb: { xs: 2, sm: 0 },
             flexGrow: 1,
+            fontFamily: 'Quicksand, sans-serif'
           }}
         >
           Kitchen Pal
@@ -82,7 +83,6 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
         )}
       </Container>
 
-      {/* Center the text and AuthPage */}
       {!isLoggedIn && (
         <Box
           sx={{
@@ -90,7 +90,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             justifyContent: 'center',
             alignItems: 'center',
             flexDirection: 'column',
-            mt: 4, // Added margin for spacing from the header
+            mt: 4, 
           }}
         >
           <Typography
