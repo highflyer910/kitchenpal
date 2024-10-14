@@ -39,7 +39,6 @@ const DietaryProfileDialog = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
-          {/* Allergens Section */}
           <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             🚫 Allergens & Intolerances
           </Typography>
@@ -58,7 +57,6 @@ const DietaryProfileDialog = ({
             ))}
           </FormGroup>
 
-          {/* Custom Allergens */}
           <Box sx={{ mt: 2, mb: 3 }}>
             <TextField
               size="small"
