@@ -3,12 +3,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Box, Container, Fade, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, CircularProgress, Zoom
+  Typography, Button, CircularProgress, Zoom, Snackbar, Alert
 } from '@mui/material';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { keyframes } from '@mui/system';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { account, databases, getProducts, getDietaryProfile, saveDietaryProfile } from './appwrite';
+import { account, databases, getProducts, getDietaryProfile, saveDietaryProfile, saveRecipe } from './appwrite';
 import Header from './components/Header';
 import ActionButtons from './components/ActionsButtons';
 import SearchAndDietary from './components/SearchAndDietary';
@@ -69,6 +69,7 @@ export default function HomePage() {
   const [dietaryProfile, setDietaryProfile] = useState(defaultDietaryProfile);
   const [customAllergen, setCustomAllergen] = useState('');
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const checkLoginStatus = useCallback(async () => {
     try {
@@ -276,6 +277,7 @@ export default function HomePage() {
       const result = await model.generateContent(prompt);
       const response = await result.response;
       setRecipeContent(response.text());
+      setRecipeContent(prevContent => prevContent);
     } catch (error) {
       console.error('Error generating recipe:', error);
       setRecipeContent('Sorry, there was an error generating your recipe. Please try again later.');
@@ -284,11 +286,32 @@ export default function HomePage() {
     }
   };
 
+  const handleSaveRecipe = async () => {
+    try {
+      if (!userId) {
+        setSnackbarOpen(true);
+        return;
+      }
+      await saveRecipe(userId, recipeContent);
+      setSnackbarOpen(true);
+      setRecipeOpen(false);
+    } catch (error) {
+      console.error('Error saving recipe:', error);
+      if (error.message === 'User is not authenticated' || error.message === 'User is not authorized to save recipes') {
+        setSnackbarOpen(true);
+        handleSignOut();
+      } else {
+        setSnackbarOpen(true);
+      }
+    }
+  };
   const handleAuthSuccess = async () => {
     try {
       const user = await account.get();
       setIsLoggedIn(true);
       setUserName(user.name);
+      setUserId(user.$id);
+      localStorage.setItem('userId', user.$id);  // Add this line
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -374,7 +397,6 @@ export default function HomePage() {
                 generateRecipe={generateRecipe} 
                 productListLength={productList.length} 
               />
-              
               {isProfileLoaded && (
                 <SearchAndDietary 
                   searchTerm={searchTerm}
@@ -418,29 +440,30 @@ export default function HomePage() {
 
               
               <Dialog 
-                open={recipeOpen} 
-                onClose={() => setRecipeOpen(false)} 
-                fullWidth 
-                maxWidth="md" 
-                TransitionComponent={Zoom}
-                transitionDuration={400}
-                PaperProps={{
-                  sx: {
-                    borderRadius: 2,
-                    padding: 1,
-                    animation: `${fadeInUp} 0.5s ease-out`
-                  }
-                }}
-              >
-                <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <RestaurantIcon /> Recipe Suggestion
-                </DialogTitle>
-                <DialogContent>
-                  {isLoadingRecipe ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-                      <CircularProgress />
-                    </Box>
-                  ) : (
+              open={recipeOpen} 
+              onClose={() => setRecipeOpen(false)} 
+              fullWidth 
+              maxWidth="md" 
+              TransitionComponent={Zoom}
+              transitionDuration={400}
+              PaperProps={{
+                sx: {
+                  borderRadius: 2,
+                  padding: 1,
+                  animation: `${fadeInUp} 0.5s ease-out`
+                }
+              }}
+            >
+              <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <RestaurantIcon /> Recipe Suggestion
+              </DialogTitle>
+              <DialogContent>
+                {isLoadingRecipe ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : (
+                  <>
                     <Typography
                       variant="body1"
                       component="div"
@@ -462,18 +485,30 @@ export default function HomePage() {
                     >
                       {recipeContent}
                     </Typography>
-                  )}
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setRecipeOpen(false)} variant="contained">
-                    Close
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </>
-          )}
-        </Box>
-      </Container>
-    </Fade>
-  );
+                  </>
+                )}
+              </DialogContent>
+              <DialogActions>
+              <Button onClick={handleSaveRecipe} variant="contained" color="primary">
+              Save Recipe
+            </Button>
+                <Button onClick={() => setRecipeOpen(false)} variant="contained">
+                  Close
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={() => setSnackbarOpen(false)}
+          message={userId ? "Recipe saved successfully!" : "Please log in to save recipes."}
+        />
+          </>
+        )}
+      </Box>
+    </Container>
+  </Fade>
+);
+
 }

@@ -140,3 +140,60 @@ export const saveDietaryProfile = async (userId, dietaryProfile) => {
       throw error;
     }
   };
+
+  export const saveRecipe = async (userId, recipe) => {
+    try {
+        // Check if the user is authenticated
+        const currentUser = await account.get();
+        if (!currentUser) {
+            throw new Error('User is not authenticated');
+        }
+
+        const response = await databases.createDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+            process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
+            ID.unique(),
+            { userId: userId, recipe: recipe }
+        );
+        return response;
+    } catch (error) {
+        console.error("Error saving recipe:", error);
+        if (error instanceof AppwriteException) {
+            if (error.code === 401) {
+                throw new Error('User is not authorized to save recipes');
+            } else {
+                throw new Error(`Appwrite error: ${error.message}`);
+            }
+        }
+        throw error;
+    }
+};
+
+export const getRecipes = async (userId) => {
+    try {
+        const response = await databases.listDocuments(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+            process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
+            [
+                Query.equal('userId', userId)
+            ]
+        );
+        return response.documents;
+    } catch (error) {
+        console.error("Error fetching recipes:", error);
+        throw error;
+    }
+};
+
+export const deleteRecipe = async (recipeId) => {
+  try {
+      await databases.deleteDocument(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+          process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
+          recipeId
+      );
+  } catch (error) {
+      console.error("Error deleting recipe:", error);
+      throw error;
+  }
+};
