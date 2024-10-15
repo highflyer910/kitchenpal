@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Box, Container, Fade, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, CircularProgress, Zoom, Snackbar, Alert
+  Typography, Button, CircularProgress, Zoom, Snackbar
 } from '@mui/material';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { keyframes } from '@mui/system';
@@ -135,7 +135,6 @@ export default function HomePage() {
   const loadDietaryProfile = async (userId) => {
     try {
       const profile = await getDietaryProfile(userId);
-      console.log('Loaded profile:', profile); // Debug line
       setDietaryProfile(profile);
       localStorage.setItem('dietaryProfile', JSON.stringify(profile));
     } catch (error) {
@@ -311,7 +310,7 @@ export default function HomePage() {
       setIsLoggedIn(true);
       setUserName(user.name);
       setUserId(user.$id);
-      localStorage.setItem('userId', user.$id);  // Add this line
+      localStorage.setItem('userId', user.$id);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -509,6 +508,4 @@ export default function HomePage() {
       </Box>
     </Container>
   </Fade>
-);
-
-}
+);}

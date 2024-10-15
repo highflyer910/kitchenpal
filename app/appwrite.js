@@ -143,7 +143,6 @@ export const saveDietaryProfile = async (userId, dietaryProfile) => {
 
   export const saveRecipe = async (userId, recipe) => {
     try {
-        // Check if the user is authenticated
         const currentUser = await account.get();
         if (!currentUser) {
             throw new Error('User is not authenticated');
