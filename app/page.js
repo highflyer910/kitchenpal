@@ -333,12 +333,18 @@ export default function HomePage() {
             onSignOut={handleSignOut}
             userName={userName}
           />
+
+          
+          {isLoggedIn && (
+            <>
+
           <Typography 
           variant="h5" 
           sx={{ 
           textAlign: 'center',
           fontFamily: 'Quicksand, sans-serif',
           color: 'text.secondary',
+          fontWeight: 500
           }}>
           Your friendly AI-powered kitchen assistant
           </Typography>
@@ -352,20 +358,16 @@ export default function HomePage() {
           textAlign: 'center' 
           }}
           >
-          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
           Hungry? KitchenPal will help you whip up something delicious using the ingredients you already have! 
           </Typography>
-          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
           Got dietary restrictions? No problem—our recipes are tailor-made to fit your unique needs.
           </Typography>
-          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif' }}>
+          <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
           Ready to get started? Dive into your pantry, adjust your dietary settings, and let’s cook up something amazing!
           </Typography>
           </Box>
-
-          
-          {isLoggedIn && (
-            <>
             
               <ActionButtons 
                 handleOpen={() => setOpen(true)} 
