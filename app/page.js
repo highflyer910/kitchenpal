@@ -15,6 +15,7 @@ import SearchAndDietary from './components/SearchAndDietary';
 import ProductList from './components/ProductList';
 import DietaryProfileDialog from './components/DietaryProfileDialog';
 import AddProductDialog from './components/AddProductDialog';
+import ReactMarkdown from 'react-markdown';
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
 
@@ -131,21 +132,6 @@ export default function HomePage() {
       loadProfileData();
     }
   }, [isLoggedIn, loadProductList]);
-
-  const loadDietaryProfile = async (userId) => {
-    try {
-      const profile = await getDietaryProfile(userId);
-      setDietaryProfile(profile);
-      localStorage.setItem('dietaryProfile', JSON.stringify(profile));
-    } catch (error) {
-      console.error('Error loading dietary profile:', error);
-      const storedProfile = localStorage.getItem('dietaryProfile');
-      if (storedProfile) {
-        setDietaryProfile(JSON.parse(storedProfile));
-      }
-    }
-  };
-  
 
   useEffect(() => {
     if (isProfileLoaded) {
@@ -269,8 +255,7 @@ export default function HomePage() {
 
       Example start:
       "👩‍🍳 
-      Oh wow, I see you have some fantastic ingredients in your kitchen! I've picked a few that will work wonderfully together.
-      I know just the perfect dish that will make everyone at the table smile..."
+      Oh, let's make a (recipe name)! I see you have some fantastic ingredients in your kitchen! I've picked a few that will work wonderfully together..."
       8. End with an enthusiastic "Bon appétit! 🍽️" and a friendly closing note.`;
 
       const result = await model.generateContent(prompt);
@@ -449,48 +434,59 @@ export default function HomePage() {
                 sx: {
                   borderRadius: 2,
                   padding: 1,
-                  animation: `${fadeInUp} 0.5s ease-out`
+                  animation: `${fadeInUp} 0.5s ease-out`,
+                  display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '90vh',
                 }
               }}
             >
               <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <RestaurantIcon /> Recipe Suggestion
               </DialogTitle>
-              <DialogContent>
+              <DialogContent sx={{ 
+                flex: 1, 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+                '&::-webkit-scrollbar-track': {
+                backgroundColor: 'rgba(0,0,0,0.1)',
+              },
+                '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                borderRadius: '4px',
+              },
+                '&::-webkit-scrollbar-thumb:hover': {
+                backgroundColor: 'rgba(0,0,0,0.3)',
+              },
+              }}>
                 {isLoadingRecipe ? (
                   <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
                     <CircularProgress />
                   </Box>
                 ) : (
                   <>
-                    <Typography
-                      variant="body1"
-                      component="div"
-                      sx={{
-                        whiteSpace: 'pre-line',
-                        my: 2,
-                        color: 'text.primary', 
-                        '& h1, & h2, & h3': {
-                          fontWeight: 600,
-                          fontFamily: 'Quicksand, sans-serif',
-                          my: 2,
-                          color: 'primary.main'
-                        },
-                        '& ul, & ol': {
-                          pl: 3,
-                          mb: 2
-                        }
-                      }}
-                    >
-                      {recipeContent}
-                    </Typography>
+                    <ReactMarkdown
+                    components={{
+                    h1: ({ node, ...props }) => <Typography variant="h4" gutterBottom {...props} />,
+                    h2: ({ node, ...props }) => <Typography variant="h5" gutterBottom {...props} />,
+                    h3: ({ node, ...props }) => <Typography variant="h6" gutterBottom {...props} />,
+                    p: ({ node, ...props }) => <Typography variant="body1" paragraph {...props} />,
+                    ul: ({ node, ...props }) => <ul style={{ paddingLeft: 20 }} {...props} />,
+                    ol: ({ node, ...props }) => <ol style={{ paddingLeft: 20 }} {...props} />,
+                    li: ({ node, ...props }) => <li style={{ marginBottom: 8 }} {...props} />,
+                  }}
+                  >
+                    {recipeContent}
+                    </ReactMarkdown>
                   </>
                 )}
               </DialogContent>
               <DialogActions>
-              <Button onClick={handleSaveRecipe} variant="contained" color="primary">
-              Save Recipe
-            </Button>
+                <Button onClick={handleSaveRecipe} variant="contained" color="primary">
+                  Save Recipe
+                </Button>
                 <Button onClick={() => setRecipeOpen(false)} variant="contained">
                   Close
                 </Button>
@@ -508,4 +504,5 @@ export default function HomePage() {
       </Box>
     </Container>
   </Fade>
-);}
+);
+}
