@@ -133,7 +133,6 @@ const AuthPage = ({ onAuthSuccess }) => {
                     </Grid>
                 </Grid>
 
-                {/* Center - Auth Form */}
                 <Grid item xs={12} md={6}>
                     <Box 
                         sx={{ 
@@ -175,7 +174,8 @@ const AuthPage = ({ onAuthSuccess }) => {
                                 },
                                 '& .MuiTab-root': {
                                     fontSize: { xs: '0.9rem', sm: '1rem' },
-                                    fontWeight: 600
+                                    fontWeight: 600,
+                                    color: 'text.secondary',
                                 }
                             }}
                         >

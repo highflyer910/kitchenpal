@@ -350,7 +350,7 @@ export default function HomePage() {
           sx={{ 
           textAlign: 'center',
           fontFamily: 'Quicksand, sans-serif',
-          color: 'text.secondary',
+          color: 'text.primary',
           fontWeight: 500
           }}>
           Your friendly AI-powered kitchen assistant
@@ -436,8 +436,8 @@ export default function HomePage() {
                   padding: 1,
                   animation: `${fadeInUp} 0.5s ease-out`,
                   display: 'flex',
-              flexDirection: 'column',
-              maxHeight: '90vh',
+                  flexDirection: 'column',
+                  maxHeight: '90vh',
                 }
               }}
             >
@@ -494,11 +494,11 @@ export default function HomePage() {
             </Dialog>
 
             <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={6000}
-          onClose={() => setSnackbarOpen(false)}
-          message={userId ? "Recipe saved successfully!" : "Please log in to save recipes."}
-        />
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={() => setSnackbarOpen(false)}
+            message={userId ? "Recipe saved successfully!" : "Please log in to save recipes."}
+            />
           </>
         )}
       </Box>

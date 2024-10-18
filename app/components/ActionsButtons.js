@@ -20,7 +20,8 @@ export default function ActionButtons({ handleOpen, generateRecipe, productListL
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: 6
+                    boxShadow: 6,
+                    color: 'background.default'
                 }
                 }}
                 >
@@ -44,7 +45,8 @@ export default function ActionButtons({ handleOpen, generateRecipe, productListL
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
                     transform: 'translateY(-2px)',
-                    boxShadow: 6
+                    boxShadow: 6,
+                    color: 'background.default'
                     }
                 }}
             >

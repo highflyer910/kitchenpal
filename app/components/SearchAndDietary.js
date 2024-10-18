@@ -58,7 +58,7 @@ export default function SearchAndDietary({ searchTerm, setSearchTerm, setDietary
                   size="small" 
                   label={getActiveRestrictions()} 
                   color="primary" 
-                  sx={{ height: 30, minWidth: 20 }} 
+                  sx={{ height: 30, minWidth: 20, color: 'secondary.main' }} 
                 />
               }
               sx={{
@@ -68,6 +68,7 @@ export default function SearchAndDietary({ searchTerm, setSearchTerm, setDietary
                 fontWeight: 'bold',
                 textTransform: 'none',
                 padding: '10px 20px',
+                color: 'text.primary',
                 '&:hover': {
                   backgroundColor: 'primary.light',
                   color: 'primary.contrastText',
@@ -88,6 +89,7 @@ export default function SearchAndDietary({ searchTerm, setSearchTerm, setDietary
                   fontWeight: 'bold',
                   textTransform: 'none',
                   padding: '10px 20px',
+                  color: 'text.primary',
                   '&:hover': {
                     backgroundColor: 'primary.light',
                     color: 'primary.contrastText',

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Typography, Box, useMediaQuery, useTheme, Button, Container } from '@mui/material';
+import { Typography, Box, useMediaQuery, Button, Container, IconButton } from '@mui/material';
+import { useTheme as useMuiTheme } from '@mui/material/styles';
+import PaletteIcon from '@mui/icons-material/Palette';
 import AuthPage from './AuthPage';
-
+import { useTheme } from '../ThemeContext';
 export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const muiTheme = useMuiTheme();
+  const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
+  const { toggleTheme } = useTheme();
 
   return (
     <Box
@@ -57,30 +60,49 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
           Kitchen Pal
         </Typography>
 
-        {isLoggedIn ? (
-          <Button
-            color="primary"
-            onClick={onSignOut}
-            variant="outlined"
-            size={isMobile ? 'small' : 'medium'}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton
             sx={{
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              px: { xs: 2, md: 3 },
-              py: { xs: 0.5, md: 1 },
-              borderWidth: 2,
+              ml: 1,
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              backgroundColor: 'background.paper',
               '&:hover': {
-                borderWidth: 2,
+                backgroundColor: 'action.hover',
               },
-              mb: { xs: 2, sm: 0 },
             }}
+            onClick={toggleTheme}
+            color="inherit"
+            aria-label="Toggle theme"
           >
-            Sign Out
-          </Button>
-        ) : (
-          <Box sx={{ width: { xs: 60, md: 100 } }} />
-        )}
+            <PaletteIcon />
+          </IconButton>
+
+          {isLoggedIn && (
+            <Button
+              color="primary"
+              onClick={onSignOut}
+              variant="outlined"
+              size={isMobile ? 'small' : 'medium'}
+              sx={{
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                px: { xs: 2, md: 3 },
+                py: { xs: 0.5, md: 1 },
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                },
+                mb: { xs: 2, sm: 0 },
+                ml: 2,
+              }}
+            >
+              Sign Out
+            </Button>
+          )}
+        </Box>
       </Container>
 
       {!isLoggedIn && (
@@ -98,7 +120,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             component="p"
             align="center"
             sx={{
-              color: 'text.secondary',
+              color: 'text.primary',
               maxWidth: '600px',
               fontWeight: 500,
               fontSize: { xs: '1rem', md: '1.25rem' },
