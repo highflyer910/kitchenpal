@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Box, useMediaQuery, IconButton, Container, Menu, MenuItem } from '@mui/material';
+import { Typography, Box, useMediaQuery, IconButton, Container, Menu, MenuItem, Tooltip } from '@mui/material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
 import PaletteIcon from '@mui/icons-material/Palette';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -96,22 +96,24 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
             Kitchen Pal
           </Typography>
 
-          <IconButton
-            sx={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              backgroundColor: 'background.paper',
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              },
-            }}
-            onClick={toggleTheme}
-            color="inherit"
-            aria-label="Toggle theme"
-          >
-            <PaletteIcon />
-          </IconButton>
+          <Tooltip title="Choose your color theme">
+            <IconButton
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                backgroundColor: 'background.default',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
+                },
+              }}
+              onClick={toggleTheme}
+              color="inherit"
+              aria-label="Choose your color theme"
+            >
+              <PaletteIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
 
         <Menu
