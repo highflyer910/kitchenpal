@@ -1,22 +1,22 @@
 import { createTheme } from '@mui/material/styles';
 
-const theme1 = createTheme({
+const theme4 = createTheme({
   palette: {
     primary: {
-      main: '#610023',
+      main: '#000000',
     },
     secondary: {
-      main: '#FCF8E8',
+      main: '#FFFFFF',
     },
     background: {
-      default: '#FFD8B1',
-      paper: '#C27F79',
+      default: '#F5F5F5',
+      paper: '#E0E0E0',
     },
     text: {
-      primary: '#3d0116',
-      secondary: '#1a0009',
+      primary: '#363B20',
+      secondary: '#1a1c0f',
     },
   },
 });
 
-export default theme1;
+export default theme4;

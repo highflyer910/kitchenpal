@@ -12,7 +12,14 @@ function ThemedLayout({ children }) {
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
-      {children}
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        transition: 'background-color 0.3s, color 0.3s'
+      }}>
+        {children}
+      </div>
       <Analytics />
     </MuiThemeProvider>
   );
@@ -21,7 +28,7 @@ function ThemedLayout({ children }) {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ margin: 0, padding: 0 }}>
         <ThemeProvider>
           <ThemedLayout>{children}</ThemedLayout>
         </ThemeProvider>

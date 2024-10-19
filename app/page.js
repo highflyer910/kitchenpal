@@ -324,7 +324,6 @@ export default function HomePage() {
 
   return (
     <Fade in={true} timeout={1000}>
-      <Container maxWidth="lg">
         <Box sx={{
           minHeight: '100vh',
           display: 'flex',
@@ -502,7 +501,6 @@ export default function HomePage() {
           </>
         )}
       </Box>
-    </Container>
   </Fade>
 );
 }
