@@ -1,13 +1,29 @@
-import React from 'react';
-import { Typography, Box, useMediaQuery, Button, Container, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { Typography, Box, useMediaQuery, IconButton, Container, Menu, MenuItem } from '@mui/material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
 import PaletteIcon from '@mui/icons-material/Palette';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import AuthPage from './AuthPage';
 import { useTheme } from '../ThemeContext';
+
 export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName }) {
   const muiTheme = useMuiTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('sm'));
   const { toggleTheme } = useTheme();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleSignOut = () => {
+    handleClose();
+    onSignOut();
+  };
 
   return (
     <Box
@@ -23,47 +39,65 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
         maxWidth="xl"
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
+          flexDirection: 'column',
           alignItems: 'center',
-          flexDirection: { xs: 'column', sm: 'row' },
         }}
       >
-        {isLoggedIn ? (
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 500,
-              color: 'text.primary',
-              textAlign: { xs: 'center', sm: 'left' },
-              mb: { xs: 2, sm: 0 },
-            }}
-          >
-            Welcome, {userName.split(' ')[0]}
-          </Typography>
-        ) : (
-          <Box sx={{ width: { xs: 60, md: 100 } }} /> 
-        )}
-
-        <Typography
-          variant={isMobile ? 'h5' : 'h3'}
-          component="h1"
+        <Box
           sx={{
-            fontWeight: 700,
-            letterSpacing: '0.02em',
-            textAlign: 'center',
-            color: 'text.primary',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
             mb: { xs: 2, sm: 0 },
-            flexGrow: 1,
-            fontFamily: 'Quicksand, sans-serif'
+            position: 'relative',
           }}
         >
-          Kitchen Pal
-        </Typography>
+          {isLoggedIn ? (
+            <Box 
+              onClick={handleClick}
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                cursor: 'pointer',
+                '&:hover': { opacity: 0.8 },
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 500,
+                  color: 'text.primary',
+                }}
+              >
+                {userName.split(' ')[0]}
+              </Typography>
+              <ArrowDropDownIcon sx={{ color: 'text.primary' }} />
+            </Box>
+          ) : (
+            <Box sx={{ width: 40, flexShrink: 0 }} />
+          )}
+          
+          <Typography
+            variant={isMobile ? 'h4' : 'h3'}
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              color: 'text.primary',
+              fontFamily: 'Quicksand, sans-serif',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 'auto',
+              textAlign: 'center',
+            }}
+          >
+            Kitchen Pal
+          </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton
             sx={{
-              ml: 1,
               width: 40,
               height: 40,
               borderRadius: '50%',
@@ -78,31 +112,44 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
           >
             <PaletteIcon />
           </IconButton>
-
-          {isLoggedIn && (
-            <Button
-              color="primary"
-              onClick={onSignOut}
-              variant="outlined"
-              size={isMobile ? 'small' : 'medium'}
-              sx={{
-                borderRadius: 2,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: { xs: 2, md: 3 },
-                py: { xs: 0.5, md: 1 },
-                borderWidth: 2,
-                '&:hover': {
-                  borderWidth: 2,
-                },
-                mb: { xs: 2, sm: 0 },
-                ml: 2,
-              }}
-            >
-              Sign Out
-            </Button>
-          )}
         </Box>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          onClick={handleClose}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              overflow: 'visible',
+              filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              '& .MuiAvatar-root': {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              '&:before': {
+                content: '""',
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: 'background.paper',
+                transform: 'translateY(-50%) rotate(45deg)',
+                zIndex: 0,
+              },
+            },
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem onClick={handleSignOut}>Sign out</MenuItem>
+        </Menu>
       </Container>
 
       {!isLoggedIn && (
@@ -130,7 +177,6 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
           >
             Save your ingredients, and discover delicious recipes in seconds!
           </Typography>
-
           <AuthPage onAuthSuccess={onAuthSuccess} />
         </Box>
       )}

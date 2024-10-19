@@ -290,7 +290,6 @@ const AuthPage = ({ onAuthSuccess }) => {
                     </Box>
                 </Grid>
 
-                {/* Features */}
                 <Grid item xs={12} md={3} container direction="column" spacing={2} alignItems="center">
                     <Grid item xs>
                         <FeatureCard

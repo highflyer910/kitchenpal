@@ -16,10 +16,9 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { getRecipes, deleteRecipe } from '../appwrite'; // Assuming deleteRecipe is implemented
+import { getRecipes, deleteRecipe } from '../appwrite';
 import { useRouter } from 'next/navigation';
 
-// Styled component for custom scrollbar
 const StyledModalContent = styled(Box)(({ theme }) => ({
   '&::-webkit-scrollbar': {
     width: '10px',
@@ -83,8 +82,8 @@ export default function MyRecipesPage() {
   }
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 4 }}>
+    <Container maxWidth="xl" sx={{ paddingTop: 0 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0, pt: 2 }}>
         <Typography variant="h4" component="h1">
           My Recipes
         </Typography>
