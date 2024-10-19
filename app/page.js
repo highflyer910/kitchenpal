@@ -380,7 +380,7 @@ export default function HomePage() {
                 Got dietary restrictions? No problem—our recipes are tailor-made to fit your unique needs.
               </Typography>
               <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
-                Ready to get started? Dive into your pantry, adjust your dietary settings, and let's cook up something amazing!
+                Ready to get started? Dive into your pantry, adjust your dietary settings, and let&apos;s cook up something amazing!
               </Typography>
             </Box>
             
