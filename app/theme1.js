@@ -14,7 +14,7 @@ const theme4 = createTheme({
     },
     text: {
       primary: '#363B20',
-      secondary: '#1a1c0f',
+      secondary: '#363636',
     },
   },
 });
