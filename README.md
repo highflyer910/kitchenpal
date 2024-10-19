@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KitchenPal 🍳
 
-## Getting Started
+Welcome to **KitchenPal**, your smart recipe manager! This app is designed to help users generate, store, and manage their favorite recipes with ease. Powered by AI and built with a seamless, responsive interface, KitchenPal ensures that all your culinary needs are just a few clicks away.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- 🌟 **AI-Generated Recipes**: Recipes are generated using the Gemini Generate API, ensuring a wide variety of creative and delicious dishes.
+- 📚 **My Recipes**: Save and view your favorite recipes with a user-friendly layout.
+- 📝 **Recipe Details**: Easily expand each recipe to view the full details or delete ones you no longer need.
+- 🌈 **Theme Customization**: Switch between different color themes to personalize your experience.
+- 🔒 **User Authentication**: Manage your personal recipe collection with secure login via Appwrite.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+![KitchenPal Screenshot](./public/screenshot.png)
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+## How It Works
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Authentication**: Users need to sign up or log in using their account via Appwrite.
+2. **Recipe Generation**: Use the integrated AI to generate creative recipes, which are then saved to your personal account.
+3. **Save & View Recipes**: Easily access your saved recipes, delete old ones, or expand to view the details.
+4. **Theme Customization**: Switch between different color themes to suit your taste and preference.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tools & Libraries
 
-## Deploy on Vercel
+- **Next.js**: For server-side rendering and frontend development.
+- **React**: For building reusable components and managing state.
+- **Material UI**: For sleek, accessible UI components.
+- **Appwrite**: For secure user authentication and managing database interactions.
+- **Gemini Generate API**: For generating unique and interesting recipes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the Creative Commons License. Feel free to modify and share it as long as you give appropriate credit.
+
+---
+
+Enjoy cooking with KitchenPal! 🍽️
