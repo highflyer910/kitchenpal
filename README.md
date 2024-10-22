@@ -4,7 +4,7 @@ Welcome to **KitchenPal**, your smart recipe manager! This app is designed to he
 
 ## Features
 
-- 🌟 **AI-Generated Recipes**: Recipes are generated using the Gemini Generate API, ensuring a wide variety of creative and delicious dishes.
+- 🌟 **AI-Generated Recipes**: Recipes are generated using the Google Generative API, ensuring a wide variety of creative and delicious dishes.
 - 📚 **My Recipes**: Save and view your favorite recipes with a user-friendly layout.
 - 📝 **Recipe Details**: Easily expand each recipe to view the full details or delete ones you no longer need.
 - 🌈 **Theme Customization**: Switch between different color themes to personalize your experience.
@@ -28,7 +28,7 @@ Welcome to **KitchenPal**, your smart recipe manager! This app is designed to he
 - **React**: For building reusable components and managing state.
 - **Material UI**: For sleek, accessible UI components.
 - **Appwrite**: For secure user authentication and managing database interactions.
-- **Gemini Generate API**: For generating unique and interesting recipes.
+- **Google Generative API**: For generating unique and interesting recipes.
 
 
 ## License
