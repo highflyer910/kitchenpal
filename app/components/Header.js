@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Typography, Box, useMediaQuery, IconButton, Container, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Typography, Box, useMediaQuery, IconButton, Container, Menu, MenuItem, Tooltip, Button } from '@mui/material';
 import { useTheme as useMuiTheme } from '@mui/material/styles';
 import PaletteIcon from '@mui/icons-material/Palette';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -23,6 +23,10 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
   const handleSignOut = () => {
     handleClose();
     onSignOut();
+  };
+
+  const handleFeedbackClick = () => {
+    window.location.href = 'https://tally.so/r/w4zE9B';
   };
 
   return (
@@ -173,12 +177,40 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
               maxWidth: '600px',
               fontWeight: 500,
               fontSize: { xs: '1rem', md: '1.25rem' },
-              mb: 4,
+              mb: 2,
               px: 2,
             }}
           >
             Save your ingredients, and discover delicious recipes in seconds!
           </Typography>
+          
+          {/* New Beta Message */}
+          <Typography
+            variant="body1"
+            component="p"
+            align="center"
+            sx={{
+              color: 'text.primary',
+              maxWidth: '600px',
+              fontWeight: 500,
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              mb: 2,
+              px: 2,
+            }}
+          >
+            (🚧 KitchenPal is currently in beta! We’re improving features and would love your feedback.)
+          </Typography>
+          
+          {/* Feedback Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleFeedbackClick}
+            sx={{ mb: 4 }}
+          >
+            Give Feedback
+          </Button>
+
           <AuthPage onAuthSuccess={onAuthSuccess} />
         </Box>
       )}
