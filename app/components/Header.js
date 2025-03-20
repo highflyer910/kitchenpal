@@ -198,7 +198,7 @@ export default function Header({ isLoggedIn, onAuthSuccess, onSignOut, userName 
               px: 2,
             }}
           >
-            (🚧 KitchenPal is currently in beta! I&apos;m improving features and would love your feedback.)
+            (🚧 KitchenPal is currently in beta! I&apos;m improving features and would love your feedback)
           </Typography>
           
           {/* Feedback Button */}
