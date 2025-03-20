@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   Box, Fade, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, CircularProgress, Zoom, Snackbar
+  Typography, Button, CircularProgress, Zoom, Snackbar, TextField
 } from '@mui/material';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { keyframes } from '@mui/system';
@@ -71,6 +71,8 @@ export default function HomePage() {
   const [customAllergen, setCustomAllergen] = useState('');
   const [isProfileLoaded, setIsProfileLoaded] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [recipeName, setRecipeName] = useState('');
+  const [recipeNameModalOpen, setRecipeNameModalOpen] = useState(false);
 
   const checkLoginStatus = useCallback(async () => {
     try {
@@ -92,7 +94,7 @@ export default function HomePage() {
   }, [checkLoginStatus]);
 
   const loadProductList = useCallback(async () => {
-    if (!userId) return; 
+    if (!userId) return;
     try {
       const products = await getProducts(userId);
       setProductList(products);
@@ -110,7 +112,7 @@ export default function HomePage() {
       }
     }
   }, [userId]);
-  
+
   useEffect(() => {
     if (isLoggedIn && userId) {
       loadProductList();
@@ -168,7 +170,7 @@ export default function HomePage() {
         [item]: !dietaryProfile[category][item]
       }
     };
-    
+
     setDietaryProfile(newProfile);
     try {
       localStorage.setItem('dietaryProfile', JSON.stringify(newProfile));
@@ -231,12 +233,12 @@ export default function HomePage() {
   const generateRecipe = async () => {
     setIsLoadingRecipe(true);
     setRecipeOpen(true);
-  
+
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-  
-      const productNames = productList.map(product => product.name); 
-  
+
+      const productNames = productList.map(product => product.name);
+
       const dietaryRestrictions = [
         ...Object.entries(dietaryProfile.allergens)
           .filter(([key, value]) => value === true && key !== 'customAllergens')
@@ -251,7 +253,7 @@ export default function HomePage() {
         .filter(([_, value]) => value === true)
         .map(([key]) => key);
 
-      const prompt = `You are a friendly and enthusiastic chef assistant. Here's a list of ingredients available: ${productNames.join(', ')}. 
+      const prompt = `You are a friendly and enthusiastic chef assistant. Here's a list of ingredients available: ${productNames.join(', ')}.
 
       Create a recipe using some of these ingredients (you don't need to use all of them) while considering the following dietary restrictions and preferences:
 
@@ -269,7 +271,7 @@ export default function HomePage() {
       Keep the tone warm and encouraging throughout the response. Be creative with the ingredients, but make sure the recipe makes culinary sense.
 
       Example start:
-      "👩‍🍳 
+      "👩‍🍳
       Oh, let's make a (recipe name)! I see you have some fantastic ingredients in your kitchen! I've picked a few that will work wonderfully together..."
       8. End with an enthusiastic "Bon appétit! 🍽️" and a friendly closing note.`;
 
@@ -284,15 +286,31 @@ export default function HomePage() {
     }
   };
 
-  const handleSaveRecipe = async () => {
+  const handleSaveRecipe = () => {
+    // Close the recipe modal and open the naming modal
+    setRecipeOpen(false);
+    setRecipeNameModalOpen(true);
+  };
+
+  const handleConfirmRecipeName = async () => {
+    if (!recipeName) {
+      console.error('Recipe name is empty');
+      return;
+    }
+
     try {
       if (!userId) {
         setSnackbarOpen(true);
         return;
       }
-      await saveRecipe(userId, recipeContent);
+      await saveRecipe(userId, recipeContent, recipeName);
+
+      // Close the naming modal after saving
+      setRecipeNameModalOpen(false);
+      setRecipeName(''); // Reset the recipe name
+
+      // Show a success message
       setSnackbarOpen(true);
-      setRecipeOpen(false);
     } catch (error) {
       console.error('Error saving recipe:', error);
       setSnackbarOpen(true);
@@ -343,18 +361,18 @@ export default function HomePage() {
         bgcolor: 'background.default',
         animation: `${fadeInUp} 0.8s ease-out`
       }}>
-        <Header 
-          isLoggedIn={isLoggedIn} 
-          onAuthSuccess={handleAuthSuccess} 
+        <Header
+          isLoggedIn={isLoggedIn}
+          onAuthSuccess={handleAuthSuccess}
           onSignOut={handleSignOut}
           userName={userName}
         />
-        
+
         {isLoggedIn && (
           <>
-            <Typography 
-              variant="h5" 
-              sx={{ 
+            <Typography
+              variant="h5"
+              sx={{
                 textAlign: 'center',
                 fontFamily: 'Quicksand, sans-serif',
                 color: 'text.primary',
@@ -364,17 +382,17 @@ export default function HomePage() {
               Your friendly AI-powered kitchen assistant
             </Typography>
 
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                flexDirection: 'column', 
-                textAlign: 'center' 
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                flexDirection: 'column',
+                textAlign: 'center'
               }}
             >
               <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
-                Hungry? KitchenPal will help you whip up something delicious using the ingredients you already have! 
+                Hungry? KitchenPal will help you whip up something delicious using the ingredients you already have!
               </Typography>
               <Typography variant="body1" sx={{ marginBottom: '16px', fontFamily: 'Quicksand, sans-serif', fontWeight: 500 }}>
                 Got dietary restrictions? No problem—our recipes are tailor-made to fit your unique needs.
@@ -383,14 +401,14 @@ export default function HomePage() {
                 Ready to get started? Dive into your pantry, adjust your dietary settings, and let&apos;s cook up something amazing!
               </Typography>
             </Box>
-            
-            <ActionButtons 
-              handleOpen={() => setOpen(true)} 
-              generateRecipe={generateRecipe} 
-              productListLength={productList.length} 
+
+            <ActionButtons
+              handleOpen={() => setOpen(true)}
+              generateRecipe={generateRecipe}
+              productListLength={productList.length}
             />
             {isProfileLoaded && (
-              <SearchAndDietary 
+              <SearchAndDietary
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 setDietaryProfileOpen={setDietaryProfileOpen}
@@ -401,14 +419,14 @@ export default function HomePage() {
             <Typography align="center" color="text.primary">
               You have {productList.length} products saved in your kitchen.
             </Typography>
-            
-            <ProductList 
-              productList={productList} 
-              searchTerm={searchTerm} 
+
+            <ProductList
+              productList={productList}
+              searchTerm={searchTerm}
               setProductList={setProductList}
             />
-            
-            <DietaryProfileDialog 
+
+            <DietaryProfileDialog
               open={dietaryProfileOpen}
               onClose={() => setDietaryProfileOpen(false)}
               dietaryProfile={dietaryProfile}
@@ -418,8 +436,8 @@ export default function HomePage() {
               handleAddCustomAllergen={handleAddCustomAllergen}
               handleRemoveCustomAllergen={handleRemoveCustomAllergen}
             />
-            
-            <AddProductDialog 
+
+            <AddProductDialog
               open={open}
               handleClose={() => setOpen(false)}
               handleAddProduct={handleAddProduct}
@@ -427,15 +445,14 @@ export default function HomePage() {
               setProductName={setProductName}
               setProductList={setProductList}
               fadeInUp={fadeInUp}
-              userId={userId} 
+              userId={userId}
             />
 
-              
-              <Dialog 
-              open={recipeOpen} 
-              onClose={() => setRecipeOpen(false)} 
-              fullWidth 
-              maxWidth="md" 
+            <Dialog
+              open={recipeOpen}
+              onClose={() => setRecipeOpen(false)}
+              fullWidth
+              maxWidth="md"
               TransitionComponent={Zoom}
               transitionDuration={400}
               PaperProps={{
@@ -452,8 +469,8 @@ export default function HomePage() {
               <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <RestaurantIcon /> Recipe Suggestion
               </DialogTitle>
-              <DialogContent sx={{ 
-                flex: 1, 
+              <DialogContent sx={{
+                flex: 1,
                 overflow: 'auto',
                 '&::-webkit-scrollbar': {
                 width: '8px',
@@ -474,21 +491,19 @@ export default function HomePage() {
                     <CircularProgress />
                   </Box>
                 ) : (
-                  <>
-                    <ReactMarkdown
+                  <ReactMarkdown
                     components={{
-                    h1: ({ node, ...props }) => <Typography variant="h4" gutterBottom {...props} />,
-                    h2: ({ node, ...props }) => <Typography variant="h5" gutterBottom {...props} />,
-                    h3: ({ node, ...props }) => <Typography variant="h6" gutterBottom {...props} />,
-                    p: ({ node, ...props }) => <Typography variant="body1" paragraph {...props} />,
-                    ul: ({ node, ...props }) => <ul style={{ paddingLeft: 20 }} {...props} />,
-                    ol: ({ node, ...props }) => <ol style={{ paddingLeft: 20 }} {...props} />,
-                    li: ({ node, ...props }) => <li style={{ marginBottom: 8 }} {...props} />,
-                  }}
+                      h1: ({ node, ...props }) => <Typography variant="h4" gutterBottom {...props} />,
+                      h2: ({ node, ...props }) => <Typography variant="h5" gutterBottom {...props} />,
+                      h3: ({ node, ...props }) => <Typography variant="h6" gutterBottom {...props} />,
+                      p: ({ node, ...props }) => <Typography variant="body1" paragraph {...props} />,
+                      ul: ({ node, ...props }) => <ul style={{ paddingLeft: 20 }} {...props} />,
+                      ol: ({ node, ...props }) => <ol style={{ paddingLeft: 20 }} {...props} />,
+                      li: ({ node, ...props }) => <li style={{ marginBottom: 8 }} {...props} />,
+                    }}
                   >
                     {recipeContent}
-                    </ReactMarkdown>
-                  </>
+                  </ReactMarkdown>
                 )}
               </DialogContent>
               <DialogActions>
@@ -501,15 +516,69 @@ export default function HomePage() {
               </DialogActions>
             </Dialog>
 
+            <Dialog
+              open={recipeNameModalOpen}
+              onClose={() => setRecipeNameModalOpen(false)}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>Name Your Recipe</DialogTitle>
+              <DialogContent>
+                <TextField
+                autoFocus
+                margin="dense"
+                id="recipeName"
+                label="Recipe Name"
+                type="text"
+                fullWidth
+                value={recipeName}
+                onChange={(e) => setRecipeName(e.target.value)}
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                      borderWidth: 1,
+                    },
+                  '&:hover fieldset': {
+                      borderColor: 'primary.light',
+                    },
+                  '&.Mui-focused fieldset': {
+                      borderColor: 'primary.main',
+                    },
+                      backgroundColor: 'transparent',
+                },
+                  '& .MuiInputBase-input': {
+                      backgroundColor: 'transparent',
+                },
+                  '& .MuiInputLabel-root': {
+                      color: 'text.secondary',
+                },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                      color: 'primary.main',
+                }
+                }}
+              />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setRecipeNameModalOpen(false)} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmRecipeName} color="primary">
+                  Save
+                </Button>
+              </DialogActions>
+            </Dialog>
+
             <Snackbar
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={() => setSnackbarOpen(false)}
-            message={userId ? "Recipe saved successfully!" : "Please log in to save recipes."}
+              open={snackbarOpen}
+              autoHideDuration={6000}
+              onClose={() => setSnackbarOpen(false)}
+              message={userId ? "Recipe saved successfully!" : "Please log in to save recipes."}
             />
           </>
         )}
       </Box>
-  </Fade>
-);
+    </Fade>
+  );
 }

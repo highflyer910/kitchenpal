@@ -141,8 +141,9 @@ export const saveDietaryProfile = async (userId, dietaryProfile) => {
     }
   };
 
-  export const saveRecipe = async (userId, recipe) => {
+  export const saveRecipe = async (userId, recipe, recipeName) => {
     try {
+        console.log('Saving recipe with name:', recipeName);
         const currentUser = await account.get();
         if (!currentUser) {
             throw new Error('User is not authenticated');
@@ -152,21 +153,16 @@ export const saveDietaryProfile = async (userId, dietaryProfile) => {
             process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
             process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
             ID.unique(),
-            { userId: userId, recipe: recipe }
+            { userId: userId, recipe: recipe, recipeName: recipeName }
         );
+        console.log('Recipe saved:', response);
         return response;
     } catch (error) {
         console.error("Error saving recipe:", error);
-        if (error instanceof AppwriteException) {
-            if (error.code === 401) {
-                throw new Error('User is not authorized to save recipes');
-            } else {
-                throw new Error(`Appwrite error: ${error.message}`);
-            }
-        }
         throw error;
     }
 };
+
 
 export const getRecipes = async (userId) => {
     try {

@@ -1,18 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Container, 
-  Typography, 
-  Box, 
-  CircularProgress, 
-  Card, 
-  CardContent, 
-  CardActions, 
-  IconButton, 
-  Button, 
-  Grid, 
-  Modal 
+import {
+  Container,
+  Typography,
+  Box,
+  CircularProgress,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
+  Button,
+  Grid,
+  Modal
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -108,9 +108,9 @@ export default function MyRecipesPage() {
                   </Typography>
                 </CardContent>
                 <CardActions disableSpacing sx={{ position: 'absolute', top: 0, right: 0 }}>
-                  <IconButton onClick={(e) => { 
-                    e.stopPropagation(); 
-                    handleDelete(recipe.$id); 
+                  <IconButton onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(recipe.$id);
                   }} aria-label="delete">
                     <DeleteIcon />
                   </IconButton>
@@ -121,8 +121,8 @@ export default function MyRecipesPage() {
         </Grid>
       )}
 
-      <Modal 
-        open={Boolean(selectedRecipe)} 
+      <Modal
+        open={Boolean(selectedRecipe)}
         onClose={handleCloseModal}
         aria-labelledby="recipe-modal-title"
         aria-describedby="recipe-modal-description"
@@ -143,7 +143,7 @@ export default function MyRecipesPage() {
           {selectedRecipe && (
             <>
               <Typography id="recipe-modal-title" variant="h5" component="h2" gutterBottom>
-                {selectedRecipe.recipeName}
+                {selectedRecipe.recipeName || `Recipe ${recipes.indexOf(selectedRecipe) + 1}`}
               </Typography>
               <Typography id="recipe-modal-description" variant="body1" sx={{ mt: 2, whiteSpace: 'pre-line' }}>
                 {selectedRecipe.recipe}
