@@ -1,31 +1,15 @@
 import React, { useState } from 'react';
 import { 
-    Box, 
-    Button, 
-    TextField, 
-    Typography, 
-    Container, 
-    Tabs, 
-    Tab,
-    InputAdornment,
-    IconButton,
-    FormControlLabel,
-    Checkbox,
-    Grid,
-    Paper,
-    Stack,
-    useTheme,
-    useMediaQuery
+    Box, Button, TextField, Typography, Container, Tabs, Tab,
+    InputAdornment, IconButton, FormControlLabel, Checkbox,
+    Grid, Paper, Stack, useTheme, useMediaQuery
 } from '@mui/material';
 import { 
-    Visibility, 
-    VisibilityOff,
-    Kitchen,
-    RestaurantMenu,
-    Settings,
-    SmartToy
+    Visibility, VisibilityOff, Kitchen, RestaurantMenu, 
+    Settings, SmartToy
 } from '@mui/icons-material';
-import { appwriteAuth } from '../appwrite';
+import GoogleIcon from '@mui/icons-material/Google';
+import { appwriteAuth, account, client } from '../appwrite';
 import Image from 'next/image';
 
 const FeatureCard = ({ icon: Icon, title, description }) => {
@@ -80,31 +64,49 @@ const AuthPage = ({ onAuthSuccess }) => {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const handleGoogleSignIn = () => {
+        account.createOAuth2Session(
+          'google',
+          window.location.origin,
+          `${window.location.origin}/auth?error=google_failed`
+        );
+      };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
+            // First, delete any existing session
+            try {
+                await account.deleteSession('current');
+            } catch (deleteError) {
+                console.log('No active session to delete');
+            }
+    
             if (isLogin) {
-                const session = await appwriteAuth.login(email, password);
+                // For login, use createEmailPasswordSession
+                const session = await account.createEmailPasswordSession(email, password);
                 if (rememberMe) {
                     localStorage.setItem('session', session.$id); 
                 } else {
-                    sessionStorage.setItem('session', session.$id); 
+                    sessionStorage.setItem('session', session.$id);
                 }
             } else {
-                await appwriteAuth.createAccount(email, password, name);
-                const session = await appwriteAuth.login(email, password);
+                // For signup: create account → create session
+                await account.create(ID.unique(), email, password, name);
+                const session = await account.createEmailPasswordSession(email, password);
                 if (rememberMe) {
                     localStorage.setItem('session', session.$id);
                 } else {
                     sessionStorage.setItem('session', session.$id);
                 }
             }
+            
             if (onAuthSuccess) {
                 onAuthSuccess();
             }
@@ -116,6 +118,7 @@ const AuthPage = ({ onAuthSuccess }) => {
     return (
         <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 } }}>
             <Grid container spacing={{ xs: 3, md: 6 }} justifyContent="center">
+                {/* Left Feature Cards */}
                 <Grid item xs={12} md={3} container direction="column" spacing={2} alignItems="center">
                     <Grid item xs>
                         <FeatureCard
@@ -133,6 +136,7 @@ const AuthPage = ({ onAuthSuccess }) => {
                     </Grid>
                 </Grid>
 
+                {/* Auth Form */}
                 <Grid item xs={12} md={6}>
                     <Box 
                         sx={{ 
@@ -163,28 +167,37 @@ const AuthPage = ({ onAuthSuccess }) => {
                             </Box>
                         </Box>
 
-                        <Tabs 
-                            value={isLogin ? 0 : 1} 
-                            onChange={(_, newValue) => setIsLogin(newValue === 0)}
-                            sx={{ 
-                                mb: 4,
-                                '& .MuiTabs-indicator': {
-                                    height: 3,
-                                    borderRadius: '3px 3px 0 0'
-                                },
-                                '& .MuiTab-root': {
-                                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                                    fontWeight: 600,
-                                    color: 'text.secondary',
-                                }
-                            }}
+                        {/* Google Sign-In Button */}
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            startIcon={<GoogleIcon />}
+                            onClick={handleGoogleSignIn}
+                            sx={{ mb: 3, py: 1.5 }}
                         >
+                            Continue with Google
+                        </Button>
+
+                        <Tabs value={isLogin ? 0 : 1} 
+                        onChange={(_, val) => setIsLogin(val === 0)}
+                        sx={{ 
+                            mb: 4,
+                            '& .MuiTabs-indicator': {
+                                height: 3,
+                                borderRadius: '3px 3px 0 0'
+                            },
+                            '& .MuiTab-root': {
+                                fontSize: { xs: '0.9rem', sm: '1rem' },
+                                fontWeight: 600,
+                                color: 'text.secondary',
+                            }
+                        }}>
                             <Tab label="Sign In" />
                             <Tab label="Sign Up" />
                         </Tabs>
 
-                        <Box component="form" onSubmit={handleSubmit}>
-                            {!isLogin && (
+                        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+                        {!isLogin && (
                                 <TextField
                                     required
                                     fullWidth
@@ -212,19 +225,16 @@ const AuthPage = ({ onAuthSuccess }) => {
                                 required
                                 fullWidth
                                 name="password"
-                                label="Password"
-                                type={showPassword ? 'text' : 'password'}
                                 id="password"
+                                label="Password"
                                 autoComplete="current-password"
+                                type={showPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
-                                            <IconButton
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                edge="end"
-                                            >
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
@@ -232,7 +242,6 @@ const AuthPage = ({ onAuthSuccess }) => {
                                 }}
                                 sx={{ mb: 2 }}
                             />
-
                             <FormControlLabel
                                 control={
                                     <Checkbox
@@ -257,22 +266,19 @@ const AuthPage = ({ onAuthSuccess }) => {
                                 }
                                 sx={{ mb: 3 }}
                             />
-
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                sx={{ 
-                                    py: { xs: 1.2, sm: 1.5 },
-                                    fontWeight: 700,
-                                    fontSize: { xs: '0.9rem', sm: '1rem' },
-                                    borderRadius: 2,
-                                    textTransform: 'none'
-                                }}
-                            >
+                            <Button 
+                            fullWidth 
+                            type="submit" 
+                            variant="contained"
+                            sx={{ 
+                                py: { xs: 1.2, sm: 1.5 },
+                                fontWeight: 700,
+                                fontSize: { xs: '0.9rem', sm: '1rem' },
+                                borderRadius: 2,
+                                textTransform: 'none'
+                            }}>
                                 {isLogin ? 'Sign In' : 'Create Account'}
                             </Button>
-                            
                             {error && (
                                 <Typography 
                                     color="error" 
@@ -290,6 +296,7 @@ const AuthPage = ({ onAuthSuccess }) => {
                     </Box>
                 </Grid>
 
+                {/* Right Feature Cards */}
                 <Grid item xs={12} md={3} container direction="column" spacing={2} alignItems="center">
                     <Grid item xs>
                         <FeatureCard
