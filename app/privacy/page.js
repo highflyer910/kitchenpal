@@ -55,7 +55,7 @@ export default function PrivacyPage() {
             1. Information We Collect
         </Typography>
         <Typography paragraph>
-            We collect only what's necessary to provide our service:
+            We collect only what&apos;s necessary to provide our service:
         </Typography>
         <Box component="ul" sx={{ pl: 4, mb: 2 }}>
             <li><Typography>Account information (email, username)</Typography></li>
