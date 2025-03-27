@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
     Box, Button, TextField, Typography, Container, Tabs, Tab,
     InputAdornment, IconButton, FormControlLabel, Checkbox,
-    Grid, Paper, Stack, useTheme, useMediaQuery
+    Grid, Paper, Stack, useTheme, useMediaQuery, Link
 } from '@mui/material';
 import { 
     Visibility, VisibilityOff, Kitchen, RestaurantMenu, 
@@ -71,11 +71,11 @@ const AuthPage = ({ onAuthSuccess }) => {
 
     const handleGoogleSignIn = () => {
         account.createOAuth2Session(
-          'google',
-          window.location.origin,
-          `${window.location.origin}/auth?error=google_failed`
+            'google',
+            window.location.origin,
+            `${window.location.origin}/auth?error=google_failed`
         );
-      };
+};
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -292,6 +292,23 @@ const AuthPage = ({ onAuthSuccess }) => {
                                     {error}
                                 </Typography>
                             )}
+                            {/* Add this after your submit button */}
+                            <Typography 
+  variant="body2" 
+  align="center"
+  sx={{ 
+    mt: 2,
+    color: 'text.secondary',
+    fontSize: '0.75rem'
+  }}
+>
+  By continuing, you agree to our{' '}
+  <Link href="/terms" style={{ color: theme.palette.primary.main, fontWeight: 500,
+    textDecoration: 'underline' }}>Terms</Link> and{' '}
+  <Link href="/privacy" style={{ color: theme.palette.primary.main, fontWeight: 500,
+    textDecoration: 'underline' }}>Privacy Policy</Link>.
+</Typography>
+
                         </Box>
                     </Box>
                 </Grid>

@@ -112,10 +112,6 @@ export default function HomePage() {
       }
     }
   }, [userId]);
-
-  useEffect(() => {
-    account.get().catch(() => router.push('/auth'));
-  }, []);
   
 
   useEffect(() => {
