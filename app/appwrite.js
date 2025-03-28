@@ -163,6 +163,23 @@ export const saveDietaryProfile = async (userId, dietaryProfile) => {
     }
 };
 
+export const updateRecipe = async (recipeId, title, content) => {
+  try {
+    return await databases.updateDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
+      recipeId,
+      { 
+        recipeName: title,
+        recipe: content 
+      }
+    );
+  } catch (error) {
+    console.error("Error updating recipe:", error);
+    throw error;
+  }
+};
+
 
 export const getRecipes = async (userId) => {
     try {
@@ -178,6 +195,21 @@ export const getRecipes = async (userId) => {
         console.error("Error fetching recipes:", error);
         throw error;
     }
+};
+
+export const toggleFavorite = async (recipeId, currentStatus) => {
+  try {
+    const response = await databases.updateDocument(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID,
+      process.env.NEXT_PUBLIC_APPWRITE_RECIPES_COLLECTION_ID,
+      recipeId,
+      { isFavorite: !currentStatus }
+    );
+    return response;
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
+    throw error;
+  }
 };
 
 export const deleteRecipe = async (recipeId) => {
